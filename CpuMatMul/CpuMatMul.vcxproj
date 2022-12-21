@@ -10,13 +10,20 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="CpuMatMul.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CpuMatMul.cuh" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{4C5DCE62-1565-434B-900C-6947F29954CB}</ProjectGuid>
-    <RootNamespace>CudaProject</RootNamespace>
+    <ProjectGuid>{2DAF4305-79A2-41D3-8191-6ABD1B1EE0A3}</ProjectGuid>
+    <RootNamespace>CpuMatMul</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
@@ -50,7 +57,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CudaCompile>
@@ -76,25 +83,6 @@
       <TargetMachinePlatform>64</TargetMachinePlatform>
     </CudaCompile>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <CudaCompile Include="kernel.cu" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CpuMatMul\CpuMatMul.vcxproj">
-      <Project>{2daf4305-79a2-41d3-8191-6abd1b1ee0a3}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\DataLoader\DataLoader.vcxproj">
-      <Project>{0edf987a-f217-454f-983a-e5365fd6f39a}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\VectorSum\VectorSum.vcxproj">
-      <Project>{e1e45b28-9d96-41f8-8502-32974ca6d776}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="A.csv" />
-    <None Include="B.csv" />
-    <None Include="D.csv" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.0.targets" />
