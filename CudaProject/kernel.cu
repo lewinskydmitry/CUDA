@@ -1,84 +1,48 @@
 ﻿
-#include "../DataLoader/DataLoader.h"
+
+#include "../Matrix/Matrix.h"
 #include "../VectorSum/VectorSum.cuh"
 #include "../CpuMatMul/CpuMatMul.cuh"
 
-__host__ int fill(float** Lmatrix, float** Rmatrix, int LdimX, int LdimY, int RdimX, int RdimY) {
-
-    int sqr_dim_X, sqr_dim_Y, size;
-
-    sqr_dim_X = RdimX;
-    if (LdimX > RdimX) {
-        sqr_dim_X = LdimX;
-    }
-
-    sqr_dim_Y = RdimY;
-    if (LdimY > RdimY) {
-        sqr_dim_Y = LdimY;
-    }
-
-    size = sqr_dim_Y;
-    if (sqr_dim_X > sqr_dim_Y) {
-        size = sqr_dim_X;
-    }
-
-    int temp = size / 16 + (size % 16 == 0 ? 0 : 1);
-    size = temp * 16;
-
-    size_t pt_size = size * size * sizeof(float);
-
-    *Lmatrix = (float*)malloc(pt_size);
-    *Rmatrix = (float*)malloc(pt_size);
-
-    memset(*Lmatrix, 0, pt_size);
-    memset(*Rmatrix, 0, pt_size);
-
-    for (int i = 0; i < LdimX; i++) {
-        for (int j = 0; j < LdimY; j++) {
-            int dummy = size * i + j;
-            (*Lmatrix)[dummy] = sinf(dummy);
-        }
-    }
-    for (int i = 0; i < RdimX; i++) {
-        for (int j = 0; j < RdimY; j++) {
-            int dummy = size * i + j;
-            (*Rmatrix)[dummy] = cosf(dummy);
-        }
-    }
-    return size;
-}
 
 int main() {
 	// DataLoader testing
 	std::cout << "Matrix A" << "\n";
-	DataLoader data_A("./A.csv", ';');
-	data_A.print();
+	Matrix A = Matrix::read_csv("./A.csv", ';');
+	A.print();
 	std::cout << "\n";
 
 	std::cout << "Matrix B" << "\n";
-	DataLoader data_B("./B.csv", ';');
-	data_B.print();
-	std::cout << "\n";
-
-	std::cout << "Matrix D" << "\n";
-	DataLoader data_D("./D.csv", ';');
-	data_D.print();
+	Matrix B = Matrix::read_csv("./B.csv", ';');
+	B.print();
 	std::cout << "\n";
 
 	//Matrix summation testing
-	std::cout << "Matrix C as sum of matrixes" << "\n";
-	int length = data_A.length;
-	int width = data_A.width;
-	int array_size = length * width;
-	double* c = new double[array_size];
+	std::cout << "Matrix sum" << std::endl;
+	Matrix sum_matrix = AddVector(A, B);
+	sum_matrix.print();
+	std::cout << std::endl;
 
-	cudaCallAddVectorKernel(data_A.data, data_B.data, c, array_size);
-	DataLoader::print_matrix(c, length, width);
-    std::cout << "\n";
+	//Matrix multiplication testing
+	std::cout << "Matrix mut" << std::endl;
+    Matrix mut_matrix = cpu_matrix_mult(A, B);
+	mut_matrix.print();
+	std::cout << std::endl;
 
-    double* cc = new double[array_size];
-    cpu_matrix_mult(data_A.data, data_B.data, cc, length);
-    DataLoader::print_matrix(cc, length, width);
+	// Generate random matrixes
+	std::cout << "Random matrix 1" << std::endl;
+	Matrix rand_matrix_1 = Matrix::create_matrix(2, 5, 0, 5);
+	rand_matrix_1.print();
+	std::cout << std::endl;
+
+	std::cout << "Random matrix 2" << std::endl;
+	Matrix rand_matrix_2 = Matrix::create_matrix(5, 2, 0, 5);
+	rand_matrix_2.print();
+	std::cout << std::endl;
+
+	// Multipliply random matrixes
+	Matrix C2 = cpu_matrix_mult(rand_matrix_1, rand_matrix_2);
+	C2.print();
 
     return 0;
 }

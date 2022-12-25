@@ -16,6 +16,11 @@
   <ItemGroup>
     <ClInclude Include="VectorSum.cuh" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Matrix\Matrix.vcxproj">
+      <Project>{b38400dc-4095-4585-a375-2fcf67b8ae19}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E1E45B28-9D96-41F8-8502-32974CA6D776}</ProjectGuid>
     <RootNamespace>VectorSum</RootNamespace>

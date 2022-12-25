@@ -83,8 +83,8 @@
     <ProjectReference Include="..\CpuMatMul\CpuMatMul.vcxproj">
       <Project>{2daf4305-79a2-41d3-8191-6abd1b1ee0a3}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\DataLoader\DataLoader.vcxproj">
-      <Project>{0edf987a-f217-454f-983a-e5365fd6f39a}</Project>
+    <ProjectReference Include="..\Matrix\Matrix.vcxproj">
+      <Project>{b38400dc-4095-4585-a375-2fcf67b8ae19}</Project>
     </ProjectReference>
     <ProjectReference Include="..\VectorSum\VectorSum.vcxproj">
       <Project>{e1e45b28-9d96-41f8-8502-32974ca6d776}</Project>
