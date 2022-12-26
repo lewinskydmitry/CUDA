@@ -14,3 +14,8 @@ void cudaCallAddMatrixKernel(const double* a,
 Matrix AddMatrix(Matrix a, Matrix b);
 
 Matrix cpu_matrix_mult(Matrix a, Matrix b);
+
+// Forward declaration of the matrix multiplication kernel
+//__global__ void MatMulKernel(const Matrix, const Matrix, Matrix);
+
+Matrix MatMul(Matrix A, Matrix B);
