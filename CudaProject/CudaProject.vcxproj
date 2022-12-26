@@ -80,14 +80,11 @@
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CpuMatMul\CpuMatMul.vcxproj">
-      <Project>{2daf4305-79a2-41d3-8191-6abd1b1ee0a3}</Project>
+    <ProjectReference Include="..\MatrixOperations\MatrixOperations.vcxproj">
+      <Project>{d1228e13-3b9b-49b2-9a8a-010ddf7f6d3a}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Matrix\Matrix.vcxproj">
       <Project>{b38400dc-4095-4585-a375-2fcf67b8ae19}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\VectorSum\VectorSum.vcxproj">
-      <Project>{e1e45b28-9d96-41f8-8502-32974ca6d776}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

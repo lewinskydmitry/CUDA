@@ -6,10 +6,11 @@
 #include "../Matrix/Matrix.h"
 #include <stdexcept>
 
-
-void cudaCallAddVectorKernel(const double* a,
+void cudaCallAddMatrixKernel(const double* a,
     const double* b,
     double* c,
     const int size);
 
-Matrix AddVector(Matrix a, Matrix b);
+Matrix AddMatrix(Matrix a, Matrix b);
+
+Matrix cpu_matrix_mult(Matrix a, Matrix b);

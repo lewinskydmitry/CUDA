@@ -1,7 +1,7 @@
-#include "vectorSum.cuh"
+﻿#include "MatrixOperations.cuh"
 
 __global__
-void cudaAddVectorKernel(const double* a,
+void cudaAddMatrixKernel(const double* a,
     const double* b,
     double* c,
     const int size) {
@@ -12,7 +12,7 @@ void cudaAddVectorKernel(const double* a,
     }
 }
 
-void cudaCallAddVectorKernel(const double* a,
+void cudaCallAddMatrixKernel(const double* a,
     const double* b,
     double* c,
     const int size) {
@@ -33,7 +33,7 @@ void cudaCallAddVectorKernel(const double* a,
     cudaMemcpy(dev_a, a, size * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(dev_b, b, size * sizeof(double), cudaMemcpyHostToDevice);
 
-    cudaAddVectorKernel <<< block_count, per_block_thread_count >>> (dev_a, dev_b, dev_c, size);
+    cudaAddMatrixKernel << < block_count, per_block_thread_count >> > (dev_a, dev_b, dev_c, size);
 
     cudaDeviceSynchronize();
 
@@ -45,7 +45,7 @@ void cudaCallAddVectorKernel(const double* a,
     cudaFree(dev_b);
 };
 
-Matrix AddVector(Matrix a, Matrix b) {
+Matrix AddMatrix(Matrix a, Matrix b) {
     int size;
     Matrix c;
     double* dev_a = 0;
@@ -74,7 +74,7 @@ Matrix AddVector(Matrix a, Matrix b) {
     cudaMemcpy(dev_a, a.data, size * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(dev_b, b.data, size * sizeof(double), cudaMemcpyHostToDevice);
 
-    cudaAddVectorKernel << < block_count, per_block_thread_count >> > (dev_a, dev_b, dev_c, size);
+    cudaAddMatrixKernel << < block_count, per_block_thread_count >> > (dev_a, dev_b, dev_c, size);
 
     cudaDeviceSynchronize();
 
@@ -86,3 +86,26 @@ Matrix AddVector(Matrix a, Matrix b) {
     cudaFree(dev_b);
     return c;
 };
+
+Matrix cpu_matrix_mult(Matrix a, Matrix b) {
+    if (a.width != b.length) {
+        std::cout << "Shapes are not matching";
+    }
+
+    Matrix c;
+    c.length = a.length;
+    c.width = b.width;
+    c.data = new double[c.length * c.width];
+
+    for (int row_a = 0; row_a < a.length; row_a++) {
+        for (int col_b = 0; col_b < b.width; col_b++) {
+
+            double temp = 0;
+            for (int i = 0; i < a.width; i++) {
+                temp += a.data[row_a * a.width + i] * b.data[i * b.width + col_b];
+            }
+            c.data[row_a * b.width + col_b] = temp;
+        }
+    }
+    return c;
+}

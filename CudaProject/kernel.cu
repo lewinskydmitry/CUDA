@@ -1,8 +1,7 @@
 ﻿
 
 #include "../Matrix/Matrix.h"
-#include "../VectorSum/VectorSum.cuh"
-#include "../CpuMatMul/CpuMatMul.cuh"
+#include "../MatrixOperations/MatrixOperations.cuh"
 
 
 int main() {
@@ -19,7 +18,7 @@ int main() {
 
 	//Matrix summation testing
 	std::cout << "Matrix sum" << std::endl;
-	Matrix sum_matrix = AddVector(A, B);
+	Matrix sum_matrix = AddMatrix(A, B);
 	sum_matrix.print();
 	std::cout << std::endl;
 
@@ -31,12 +30,12 @@ int main() {
 
 	// Generate random matrixes
 	std::cout << "Random matrix 1" << std::endl;
-	Matrix rand_matrix_1 = Matrix::create_matrix(2, 5, 0, 5);
+	Matrix rand_matrix_1 = Matrix::create_matrix(20, 5, 0, 5);
 	rand_matrix_1.print();
 	std::cout << std::endl;
 
 	std::cout << "Random matrix 2" << std::endl;
-	Matrix rand_matrix_2 = Matrix::create_matrix(5, 2, 0, 5);
+	Matrix rand_matrix_2 = Matrix::create_matrix(5, 10, 0, 5);
 	rand_matrix_2.print();
 	std::cout << std::endl;
 

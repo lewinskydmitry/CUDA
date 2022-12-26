@@ -79,6 +79,5 @@ Matrix Matrix::create_matrix(int length, int width, int min, int max) {
     for (int i = 0; i < size; i++) {
         rand.data[i] = uni(rng);
     }
-
     return rand;
-};
+}
