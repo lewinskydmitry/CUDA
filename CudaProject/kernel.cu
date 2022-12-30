@@ -48,18 +48,7 @@ int main() {
 	std::cout << std::endl;
 	std::cout << std::endl;
 
-	SubMatrix A;
-	A.length = rand_matrix_1.length;
-	A.width = rand_matrix_1.width;
-	A.data = rand_matrix_1.data;
-
-	SubMatrix B;
-	B.length = rand_matrix_2.length;
-	B.width = rand_matrix_2.width;
-	B.data = rand_matrix_2.data;
-
-
-	Matrix C = MatMulSH(A, B);
+	Matrix C = MatMulSH(rand_matrix_1, rand_matrix_2);
 	C.print();
     return 0;
 }

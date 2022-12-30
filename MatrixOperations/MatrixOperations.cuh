@@ -48,7 +48,7 @@ __device__ SubMatrix GetSubMatrix(SubMatrix A, int row, int col);
 __global__ void MatMulKernelSH(const SubMatrix, const SubMatrix, SubMatrix);
 // Matrix multiplication - Host code
 // Matrix dimensions are assumed to be multiples of BLOCK_SIZE
-Matrix MatMulSH(const SubMatrix A, const SubMatrix B);
+Matrix MatMulSH(const Matrix A, const Matrix B);
 #define BLOCK_SIZE 16
 
 

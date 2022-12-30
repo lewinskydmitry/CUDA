@@ -21,8 +21,6 @@ Matrix Matrix::read_csv(std::string path, char delimiter =';') {
 }
 
 
-
-
 void Matrix::create_data(std::vector< std::vector<double> > vector2d, Matrix matrix) {
     for (int i = 0; i < matrix.length; i++) {
         for (int j = 0; j < matrix.width; j++) {
@@ -30,6 +28,7 @@ void Matrix::create_data(std::vector< std::vector<double> > vector2d, Matrix mat
         }
     }
 }
+
 
 void Matrix::print() {
     for (int i = 0; i < length * width; i++) {
@@ -41,6 +40,7 @@ void Matrix::print() {
         }
     }
 }
+
 
 void Matrix::print_matrix(Matrix matrix) {
     int length = matrix.length;
@@ -55,7 +55,6 @@ void Matrix::print_matrix(Matrix matrix) {
         }
     }
 }
-
 
 
 Matrix Matrix::create_matrix(int length, int width, int min, int max) {
