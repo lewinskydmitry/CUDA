@@ -1,11 +1,5 @@
 #include "Matrix.h"
 
-Matrix::Matrix() {
-    length = 0;
-    width = 0;
-    data = new double[length * width];
-};
-
 Matrix Matrix::read_csv(std::string path, char delimiter =';') {
     Matrix result;
     std::vector< std::vector<double> > vector2d;

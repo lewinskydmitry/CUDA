@@ -16,7 +16,6 @@ public:
     std::vector< std::vector<double> > vector2d;
     double* data;
 
-    Matrix();
     static Matrix read_csv(std::string path, char delimiter);
     void print();
     void create_data(std::vector< std::vector<double> > vector2d, Matrix matrix);

@@ -2,7 +2,10 @@
 
 #include "../Matrix/Matrix.h"
 #include "../MatrixOperations/MatrixOperations.cuh"
-
+void set(Matrix A)
+{
+	A.data[0] = 5;
+};
 
 int main() {
 	//// DataLoader testing
@@ -30,12 +33,12 @@ int main() {
 
 	//// Generate random matrixes
 	//std::cout << "Random matrix 1" << std::endl;
-	Matrix rand_matrix_1 = Matrix::create_matrix(20, 5, 0, 5);
+	Matrix rand_matrix_1 = Matrix::create_matrix(16, 16, 0, 5);
 	//rand_matrix_1.print();
 	//std::cout << std::endl;
 
 	//std::cout << "Random matrix 2" << std::endl;
-	Matrix rand_matrix_2 = Matrix::create_matrix(5, 10, 0, 5);
+	Matrix rand_matrix_2 = Matrix::create_matrix(16, 16, 0, 5);
 	//rand_matrix_2.print();
 	//std::cout << std::endl;
 
@@ -44,8 +47,19 @@ int main() {
 	C2.print();
 	std::cout << std::endl;
 	std::cout << std::endl;
-	
-	Matrix C = MatMul(rand_matrix_1, rand_matrix_2);
+
+	SubMatrix A;
+	A.length = rand_matrix_1.length;
+	A.width = rand_matrix_1.width;
+	A.data = rand_matrix_1.data;
+
+	SubMatrix B;
+	B.length = rand_matrix_2.length;
+	B.width = rand_matrix_2.width;
+	B.data = rand_matrix_2.data;
+
+
+	Matrix C = MatMulSH(A, B);
 	C.print();
     return 0;
 }

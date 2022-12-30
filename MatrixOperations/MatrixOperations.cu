@@ -87,6 +87,10 @@ Matrix AddMatrix(Matrix a, Matrix b) {
     return c;
 };
 
+
+//--------------------------------------------------------------
+// CPU MULTIPLICATION
+//--------------------------------------------------------------
 Matrix cpu_matrix_mult(Matrix a, Matrix b) {
     if (a.width != b.length) {
         std::cout << "Shapes are not matching";
@@ -110,7 +114,9 @@ Matrix cpu_matrix_mult(Matrix a, Matrix b) {
     return c;
 }
 
-
+//--------------------------------------------------------------
+// MULTIPLICATION WITHOUT SHARED MEMORY
+//--------------------------------------------------------------
 
 
 // Matrix multiplication kernel called by MatMul()
@@ -164,3 +170,117 @@ Matrix MatMul(Matrix A, Matrix B)
     return C;
 }
 
+//--------------------------------------------------------------
+// MULTIPLICATION WITH SHARED MEMORY
+//--------------------------------------------------------------
+
+// Get a matrix element
+__device__ float GetElement(const SubMatrix A, int row, int col)
+{
+    return A.data[row * A.width + col];
+}
+// Set a matrix element
+__device__ void SetElement(SubMatrix A, int row, int col,
+    float value)
+{
+    A.data[row * A.width + col] = value;
+}
+// Get the BLOCK_SIZExBLOCK_SIZE sub-matrix Asub of A that is
+// located col sub-matrices to the right and row sub-matrices down
+// from the upper-left corner of A
+__device__ SubMatrix GetSubMatrix(SubMatrix A, int row, int col)
+{
+    SubMatrix Asub;
+    Asub.width = BLOCK_SIZE;
+    Asub.length = BLOCK_SIZE;
+    Asub.data = &A.data[A.width * BLOCK_SIZE * row + BLOCK_SIZE * col];
+    return Asub;
+}
+
+// Matrix multiplication - Host code
+// Matrix dimensions are assumed to be multiples of BLOCK_SIZE
+Matrix MatMulSH(const SubMatrix A, const SubMatrix B)
+{
+    // Load A and B to device memory
+    SubMatrix d_A;
+    d_A.width = A.width; d_A.length = A.length;
+    size_t size = A.width * A.length;
+    cudaMalloc(&d_A.data, size * sizeof(double));
+    cudaMemcpy(d_A.data, A.data, size * sizeof(double), cudaMemcpyHostToDevice);
+    
+    SubMatrix d_B;
+    d_B.width = B.width; d_B.length = B.length;
+    size = B.width * B.length;
+    cudaMalloc(&d_B.data, size * sizeof(double));
+    cudaMemcpy(d_B.data, B.data, size * sizeof(double), cudaMemcpyHostToDevice);
+
+    // Allocate C in device memory
+    SubMatrix d_C;
+    d_C.width = B.width; d_C.length = A.length;
+    size = B.width * A.length;
+    cudaMalloc(&d_C.data, size * sizeof(double));
+
+    // Invoke kernel
+    dim3 dimBlock(16, 16);
+    dim3 dimGrid(B.width / dimBlock.x, A.length / dimBlock.y);
+    MatMulKernelSH << <dimGrid, dimBlock >> > (d_A, d_B, d_C);
+
+    Matrix C;
+    C.length = A.length;
+    C.width = B.width;
+    size = A.length * B.width;
+    C.data = new double[size];
+    // Read C from device memory
+    cudaMemcpy(C.data, d_C.data, size * sizeof(double), cudaMemcpyDeviceToHost);
+    // Free device memory
+    cudaFree(d_A.data);
+    cudaFree(d_B.data);
+    cudaFree(d_C.data);
+    return C;
+}
+
+// Matrix multiplication kernel called by MatMul()
+__global__ void MatMulKernelSH(SubMatrix A, SubMatrix B, SubMatrix C)
+{
+    // Block row and column
+    int blockRow = blockIdx.y;
+    int blockCol = blockIdx.x;
+    // Each thread block computes one sub-matrix Csub of C
+    SubMatrix Csub = GetSubMatrix(C, blockRow, blockCol);
+    // Each thread computes one element of Csub
+    // by accumulating results into Cvalue
+    float Cvalue = 0;
+    // Thread row and column within Csub
+    int row = threadIdx.y;
+    int col = threadIdx.x;
+    // Loop over all the sub-matrices of A and B that are
+    // required to compute Csub
+    // Multiply each pair of sub-matrices together
+    // and accumulate the results
+    for (int m = 0; m < (A.width / BLOCK_SIZE); ++m) {
+        // Get sub-matrix Asub of A
+        SubMatrix Asub = GetSubMatrix(A, blockRow, m);
+        // Get sub-matrix Bsub of B
+        SubMatrix Bsub = GetSubMatrix(B, m, blockCol);
+        // Shared memory used to store Asub and Bsub respectively
+        __shared__ float As[BLOCK_SIZE][BLOCK_SIZE];
+        __shared__ float Bs[BLOCK_SIZE][BLOCK_SIZE];
+        // Load Asub and Bsub from device memory to shared memory
+        // Each thread loads one element of each sub-matrix
+        As[row][col] = GetElement(Asub, row, col);
+        Bs[row][col] = GetElement(Bsub, row, col);
+        // Synchronize to make sure the sub-matrices are loaded
+        // before starting the computation
+        __syncthreads();
+        // Multiply Asub and Bsub together
+        for (int e = 0; e < BLOCK_SIZE; ++e)
+            Cvalue += As[row][e] * Bs[e][col];
+        // Synchronize to make sure that the preceding
+        // computation is done before loading two new
+        // sub-matrices of A and B in the next iteration
+        __syncthreads();
+    }
+    // Write Csub to device memory
+    // Each thread writes one element
+    SetElement(Csub, row, col, Cvalue);
+}
