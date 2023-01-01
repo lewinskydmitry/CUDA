@@ -1,7 +1,6 @@
 ﻿#include "MatrixOperations.cuh"
 
 
-
 __device__ float GetElement(const Matrix A, int row, int col)
 {
     return A.data[row * A.width + col];
@@ -99,15 +98,5 @@ Matrix MatMulSH(const Matrix A, const Matrix B)
     cudaFree(d_B.data);
     cudaFree(d_C.data);
 
-    cudaDeviceSynchronize();
-    cudaError_t error = cudaGetLastError();
-    if (error != cudaSuccess)
-    {
-        fprintf(stderr, "ERROR: %s\n", cudaGetErrorString(error));
-        exit(-1);
-    }
-
     return C;
 }
-
-
