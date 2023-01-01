@@ -1,7 +1,7 @@
 #include "MatrixOperations.cuh"
 
 // Matrix multiplication kernel called by MatMul()
-__global__ void MatMulKernel(Matrix A, Matrix B, double* C)
+__global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 {
     // Each thread computes one element of C
     // by accumulating results into Cvalue
@@ -10,7 +10,7 @@ __global__ void MatMulKernel(Matrix A, Matrix B, double* C)
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     for (int e = 0; e < A.width; ++e)
         Cvalue += A.data[row * A.width + e] * B.data[e * B.width + col];
-    C[row * B.width + col] = Cvalue;
+    C.data[row * B.width + col] = Cvalue;
 }
 
 Matrix MatMul(Matrix A, Matrix B)
@@ -29,24 +29,28 @@ Matrix MatMul(Matrix A, Matrix B)
     cudaMemcpy(d_B.data, B.data, size * sizeof(double), cudaMemcpyHostToDevice);
 
     // Allocate C in device memory
-    double* dev_c = 0;
-    cudaMalloc((void**)&dev_c, A.length * B.width * sizeof(double));
+    Matrix d_C;
+    d_C.length = A.length;
+    d_C.width = B.width;
+    size = A.length * B.width;
+    cudaMalloc(&d_C.data, size * sizeof(double));
 
     // Invoke kernel
-    dim3 dimBlock(16, 16);
-    dim3 dimGrid(B.width / dimBlock.x + 1, A.length / dimBlock.y + 1);
-    MatMulKernel << <dimGrid, dimBlock >> > (d_A, d_B, dev_c);
+    dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+    dim3 dimGrid(B.width / dimBlock.x, A.length / dimBlock.y);
+    MatMulKernel << <dimGrid, dimBlock >> > (d_A, d_B, d_C);
 
     Matrix C;
     C.length = A.length;
     C.width = B.width;
     size = A.length * B.width;
     C.data = new double[size];
+
     // Read C from device memory
-    cudaMemcpy(C.data, dev_c, size * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(C.data, d_C.data, size * sizeof(double), cudaMemcpyDeviceToHost);
     // Free device memory
     cudaFree(d_A.data);
     cudaFree(d_B.data);
-    cudaFree(dev_c);
+    cudaFree(d_C.data);
     return C;
 }

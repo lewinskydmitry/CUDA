@@ -50,5 +50,11 @@ int main() {
 
 	Matrix C = MatMulSH(rand_matrix_1, rand_matrix_2);
 	C.print();
+	std::cout << std::endl;
+	std::cout << std::endl;
+
+	Matrix CC = AddMatrix(rand_matrix_1, rand_matrix_2);
+	CC.print();
+
     return 0;
 }

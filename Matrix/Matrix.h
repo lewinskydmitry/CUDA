@@ -13,7 +13,6 @@ class Matrix {
 public:
     size_t length;
     size_t width;
-    std::vector< std::vector<double> > vector2d;
     double* data;
 
     static Matrix read_csv(std::string path, char delimiter);

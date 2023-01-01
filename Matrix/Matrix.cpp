@@ -43,8 +43,8 @@ void Matrix::print() {
 
 
 void Matrix::print_matrix(Matrix matrix) {
-    int length = matrix.length;
-    int width = matrix.width;
+    size_t length = matrix.length;
+    size_t width = matrix.width;
 
     for (int i = 0; i < length * width; i++) {
         if ((i + 1) % width == 0 && i != 0) {
@@ -66,7 +66,7 @@ Matrix Matrix::create_matrix(int length, int width, int min, int max) {
 
     rand.length = length;
     rand.width = width;
-    int size = rand.length * rand.width;
+    size_t size = rand.length * rand.width;
     rand.data = new double[size];
 
     for (int i = 0; i < size; i++) {
