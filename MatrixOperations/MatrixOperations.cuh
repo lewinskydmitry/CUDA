@@ -5,14 +5,14 @@
 #include <iostream>
 #include "../Matrix/Matrix.h"
 #include <stdexcept>
-#define BLOCK_SIZE 16
+#define BLOCK_SIZE 8
 
 
 //-------------------------------------------------------------
 // GPU MATRIX ADDITION
 //-------------------------------------------------------------
 
-Matrix AddMatrix(Matrix a, Matrix b);
+Matrix AddMatrix(Matrix A, Matrix B);
 
 //-------------------------------------------------------------
 // CPU MATRIX MULTIPLICATION

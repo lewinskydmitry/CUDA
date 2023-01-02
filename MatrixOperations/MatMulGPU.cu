@@ -15,6 +15,19 @@ __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 
 Matrix MatMul(Matrix A, Matrix B)
 {
+
+    if (A.width != B.length) {
+        try {
+            throw std::invalid_argument("Dimensions do not match");
+        }
+        catch (const std::invalid_argument& e) {
+            std::cout << "Matrix multiplication error:" << "\n";
+            std::cout << e.what() << std::endl;
+            exit(1);
+        }
+    }
+
+
     // Load A and B to device memory
     Matrix d_A;
     d_A.width = A.width; d_A.length = A.length;

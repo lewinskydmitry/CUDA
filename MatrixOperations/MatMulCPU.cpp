@@ -1,24 +1,31 @@
 #include "MatrixOperations.cuh"
 
-Matrix cpu_matrix_mult(Matrix a, Matrix b) {
-    if (a.width != b.length) {
-        std::cout << "Shapes are not matching";
-    }
-
-    Matrix c;
-    c.length = a.length;
-    c.width = b.width;
-    c.data = new double[c.length * c.width];
-
-    for (int row_a = 0; row_a < a.length; row_a++) {
-        for (int col_b = 0; col_b < b.width; col_b++) {
-
-            double temp = 0;
-            for (int i = 0; i < a.width; i++) {
-                temp += a.data[row_a * a.width + i] * b.data[i * b.width + col_b];
-            }
-            c.data[row_a * b.width + col_b] = temp;
+Matrix cpu_matrix_mult(Matrix A, Matrix B) {
+    if (A.width != B.length) {
+        try {
+            throw std::invalid_argument("Dimensions do not match");
+        }
+        catch (const std::invalid_argument& e) {
+            std::cout << "Matrix multiplication error:" << "\n";
+            std::cout << e.what() << std::endl;
+            exit(1);
         }
     }
-    return c;
+
+    Matrix C;
+    C.length = A.length;
+    C.width = B.width;
+    C.data = new double[C.length * C.width];
+
+    for (int row_a = 0; row_a < A.length; row_a++) {
+        for (int col_b = 0; col_b < B.width; col_b++) {
+
+            double temp = 0;
+            for (int i = 0; i < A.width; i++) {
+                temp += A.data[row_a * A.width + i] * B.data[i * B.width + col_b];
+            }
+            C.data[row_a * B.width + col_b] = temp;
+        }
+    }
+    return C;
 }

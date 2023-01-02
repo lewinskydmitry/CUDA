@@ -1,9 +1,9 @@
 #include "MatrixOperations.cuh"
 
+
 __global__
-void cudaAddMatrixKernel(const Matrix A,
-    const Matrix B,
-    Matrix C) {
+void cudaAddMatrixKernel(const Matrix A, const Matrix B, Matrix C) 
+{
     int size = A.width * A.length;
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
     while (thread_idx < size) {
@@ -15,9 +15,20 @@ void cudaAddMatrixKernel(const Matrix A,
 
 Matrix AddMatrix(Matrix A, Matrix B) {
 
+    if (A.length != B.length && A.width != B.width) {
+        try {
+            throw std::invalid_argument("Dimensions do not match");
+        }
+        catch (const std::invalid_argument& e) {
+            std::cout << "Matrix addition error:" << "\n";
+            std::cout << e.what() << std::endl;
+            exit(1);
+        }
+    }
+
     Matrix d_A;
     d_A.width = A.width; d_A.length = A.length;
-    size_t size = A.width * A.length;
+    int size = A.width * A.length;
     cudaMalloc(&d_A.data, size * sizeof(double));
     cudaMemcpy(d_A.data, A.data, size * sizeof(double), cudaMemcpyHostToDevice);
 
@@ -30,14 +41,12 @@ Matrix AddMatrix(Matrix A, Matrix B) {
     Matrix d_C;
     d_C.width = B.width; d_C.length = B.length;
     cudaMalloc(&d_C.data, size * sizeof(double));
-    cudaMemcpy(d_C.data, B.data, size * sizeof(double), cudaMemcpyHostToDevice);
 
-    int per_block_thread_count = 1024;
-    int block_count = (int)ceil(size / (int)per_block_thread_count);
 
-    cudaAddMatrixKernel << < block_count, per_block_thread_count >> > (d_A, d_B, d_C);
-
-    cudaDeviceSynchronize();
+    dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+    dim3 dimGrid(ceil((float)A.width / (float)dimBlock.x), ceil((float)A.length / (float)dimBlock.y));
+    
+    cudaAddMatrixKernel << < dimGrid, dimBlock >> > (d_A, d_B, d_C);
 
     Matrix C;
     C.width = B.width; C.length = B.length;
@@ -48,5 +57,6 @@ Matrix AddMatrix(Matrix A, Matrix B) {
     cudaFree(d_A.data);
     cudaFree(d_B.data);
     cudaFree(d_C.data);
+
     return C;
 };

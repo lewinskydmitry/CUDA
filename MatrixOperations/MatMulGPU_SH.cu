@@ -51,8 +51,9 @@ __global__ void MatMulKernelSH(Matrix A, Matrix B, Matrix C)
 
         __syncthreads();
 
-        for (int e = 0; e < BLOCK_SIZE; ++e)
+        for (int e = 0; e < BLOCK_SIZE; ++e) {
             Cvalue += As[row][e] * Bs[e][col];
+        }
         __syncthreads();
     }
 
@@ -62,6 +63,19 @@ __global__ void MatMulKernelSH(Matrix A, Matrix B, Matrix C)
 
 Matrix MatMulSH(const Matrix A, const Matrix B)
 {
+
+    if (A.width != B.length) {
+        try {
+            throw std::invalid_argument("Dimensions do not match");
+        }
+        catch (const std::invalid_argument& e) {
+            std::cout << "Matrix multiplication error:" << "\n";
+            std::cout << e.what() << std::endl;
+            exit(1);
+        }
+    }
+
+
     // Load A and B to device memory
     Matrix d_A;
     d_A.width = A.width; d_A.length = A.length;
@@ -84,7 +98,7 @@ Matrix MatMulSH(const Matrix A, const Matrix B)
     // Invoke kernel
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
     dim3 dimGrid(B.width / dimBlock.x, A.length / dimBlock.y);
-    MatMulKernelSH << <dimGrid, dimBlock >> > (d_A, d_B, d_C);
+    MatMulKernelSH <<< dimGrid, dimBlock >>> (d_A, d_B, d_C);
 
     Matrix C;
     C.length = A.length;
