@@ -74,3 +74,20 @@ Matrix Matrix::create_matrix(int length, int width, int min, int max) {
     }
     return rand;
 }
+
+int Matrix::equal(Matrix comp_matrix) {
+    if (comp_matrix.length != length || comp_matrix.width != width) {
+        std::cout << "Matrixes are not equal SHAPES" << std::endl;
+        return 1;
+    }
+    for (int row = 0; row < length; row++) {
+        for (int col = 0; col < width; col++) {
+            if (data[row * width + col] != comp_matrix.data[row * width + col]) {
+                std::cout << "Matrixes are not equal#"<< row * width + col << std::endl;
+                return 1;
+            }
+        }
+    }
+    std::cout << "Matrixes are equal" << std::endl;
+    return 0;
+}

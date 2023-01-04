@@ -21,4 +21,5 @@ public:
     void create_data(std::vector< std::vector<double> > vector2d, Matrix matrix);
     static void print_matrix(Matrix matrix);
     static Matrix create_matrix(int length, int width, int min, int max);
+    int equal(Matrix comp_matrix);
 };

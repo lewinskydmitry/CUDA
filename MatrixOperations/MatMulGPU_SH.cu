@@ -47,8 +47,21 @@ __global__ void MatMulKernelSH(Matrix A, Matrix B, Matrix C)
         __shared__ double As[BLOCK_SIZE][BLOCK_SIZE];
         __shared__ double Bs[BLOCK_SIZE][BLOCK_SIZE];
 
-        As[row][col] = GetElement(Asub, row, col);
-        Bs[row][col] = GetElement(Bsub, row, col);
+        if (m * BLOCK_SIZE + threadIdx.x < A.width && blockRow * BLOCK_SIZE + threadIdx.y < A.length) {
+            As[row][col] = GetElement(Asub, row, col);
+        }
+        else
+        {
+            As[row][col] = 0;
+        }
+
+        if (m * BLOCK_SIZE + threadIdx.y < B.length && blockCol * BLOCK_SIZE + threadIdx.x < B.width) {
+            Bs[row][col] = GetElement(Bsub, row, col);
+        }
+        else
+        {
+            Bs[row][col] = 0;
+        }
 
         __syncthreads();
 
@@ -58,7 +71,9 @@ __global__ void MatMulKernelSH(Matrix A, Matrix B, Matrix C)
         __syncthreads();
     }
 
-    SetElement(Csub, row, col, Cvalue);
+    if (blockIdx.y * BLOCK_SIZE + threadIdx.y < C.length && blockIdx.x * BLOCK_SIZE + threadIdx.x < C.width) {
+        SetElement(Csub, row, col, Cvalue);
+    }
 }
 
 

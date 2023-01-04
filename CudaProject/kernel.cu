@@ -27,32 +27,22 @@ int main() {
 
 	//// Generate random matrixes
 	//std::cout << "Random matrix 1" << std::endl;
-	Matrix rand_matrix_1 = Matrix::create_matrix(23, 6, 0, 5);
+	Matrix rand_matrix_1 = Matrix::create_matrix(33, 5, 0, 5);
 	//rand_matrix_1.print();
 	//std::cout << std::endl;
 
 	//std::cout << "Random matrix 2" << std::endl;
-	Matrix rand_matrix_2 = Matrix::create_matrix(6, 23, 0, 5);
+	Matrix rand_matrix_2 = Matrix::create_matrix(5, 55, 0, 5);
 	//rand_matrix_2.print();
 	//std::cout << std::endl;
 
 
-	Matrix C3 = cpu_matrix_mult(rand_matrix_1, rand_matrix_2);
-	C3.print();
-	std::cout << std::endl;
-	std::cout << std::endl;
+	Matrix C1 = cpu_matrix_mult(rand_matrix_1, rand_matrix_2);
+	Matrix C2 = MatMul(rand_matrix_1, rand_matrix_2);
+	Matrix C3 = MatMulSH(rand_matrix_1, rand_matrix_2);
 
-
-	Matrix C1 = MatMul(rand_matrix_1, rand_matrix_2);
-	C1.print();
-	std::cout << std::endl;
-	std::cout << std::endl;
-
-
-	Matrix C2 = MatMulSH(rand_matrix_1, rand_matrix_2);
-	C2.print();
-	std::cout << std::endl;
-	std::cout << std::endl;
+	C1.equal(C2);
+	C1.equal(C3);
 
     return 0;
 }

@@ -5,13 +5,17 @@ __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 {
     // Each thread computes one element of C
     // by accumulating results into Cvalue
-    double Cvalue = 0;
+    
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
-    for (int e = 0; e < A.width; ++e)
-        Cvalue += A.data[row * A.width + e] * B.data[e * B.width + col];
-    C.data[row * B.width + col] = Cvalue;
+    if (row < A.length && col < B.width) {
+        double Cvalue = 0;
+        for (int e = 0; e < A.width; ++e)
+            Cvalue += A.data[row * A.width + e] * B.data[e * B.width + col];
+        C.data[row * B.width + col] = Cvalue;
+    }
 }
+
 
 Matrix MatMul(Matrix A, Matrix B)
 {
