@@ -80,6 +80,7 @@
   <ItemGroup>
     <CudaCompile Include="MatMulGPU.cu" />
     <CudaCompile Include="MatMulGPU_SH.cu" />
+    <CudaCompile Include="MatTranspose.cu" />
     <CudaCompile Include="VectorAddGPU.cu" />
   </ItemGroup>
   <ItemGroup>

@@ -91,3 +91,54 @@ int Matrix::equal(Matrix comp_matrix) {
     std::cout << "Matrixes are equal" << std::endl;
     return 0;
 }
+
+
+int Matrix::equal(Matrix A, Matrix B) {
+    if (A.length != B.length || A.width != B.width) {
+        std::cout << "Shapes of the matrixes are not equal" << std::endl;
+        return 1;
+    }
+    for (int row = 0; row < A.length; row++) {
+        for (int col = 0; col < A.width; col++) {
+            if (A.data[row * A.width + col] != B.data[row * B.width + col]) {
+                std::cout << "Matrixes are not equal in #" << row * A.width + col << std::endl;
+                return 1;
+            }
+        }
+    }
+    std::cout << "Matrixes are equal" << std::endl;
+    return 0;
+}
+
+
+void Matrix::T() {
+    double* result = new double[length*width];
+
+    for (int row = 0; row < length; row++) {
+        for (int col = 0; col < width; col++) {
+            result[length * col + row] = data[width * row + col];
+        }
+    }
+
+    int var = length;
+    length = width;
+    width = var;
+    data = result;
+}
+
+
+Matrix Matrix::transpose(Matrix init) {
+    Matrix result;
+    result.length = init.width;
+    result.width = init.length;
+    size_t size = result.length * result.width;
+    result.data = new double[size];
+
+    for (int row = 0; row < init.length; row++) {
+        for (int col = 0; col < init.width; col++) {
+            result.data[init.length * col + row] = init.data[init.width * row + col];
+        }
+    }
+
+    return result;
+}

@@ -3,46 +3,9 @@
 
 
 int main() {
-	//// DataLoader testing
-	//std::cout << "Matrix A" << "\n";
-	//Matrix A = Matrix::read_csv("./A.csv", ';');
-	//A.print();
+	Matrix rand_matrix_1 = Matrix::create_matrix(3, 4, 0, 5);
+	Matrix rand_matrix_2 = Matrix::create_matrix(3, 3, 0, 5);
 
-	////std::cout << "Matrix B" << "\n";
-	//Matrix B = Matrix::read_csv("./B.csv", ';');
-	//B.print();
-	//std::cout << "\n";
-
-	////Matrix summation testing
-	//std::cout << "Matrix sum" << std::endl;
-	//Matrix sum_matrix = AddMatrix(A, B);
-	//sum_matrix.print();
-	//std::cout << std::endl;
-
-	////Matrix multiplication testing
-	//std::cout << "Matrix mut" << std::endl;
-    //Matrix mut_matrix = cpu_matrix_mult(A, B);
-	//mut_matrix.print();
-	//std::cout << std::endl;
-
-	//// Generate random matrixes
-	//std::cout << "Random matrix 1" << std::endl;
-	Matrix rand_matrix_1 = Matrix::create_matrix(33, 5, 0, 5);
-	//rand_matrix_1.print();
-	//std::cout << std::endl;
-
-	//std::cout << "Random matrix 2" << std::endl;
-	Matrix rand_matrix_2 = Matrix::create_matrix(5, 55, 0, 5);
-	//rand_matrix_2.print();
-	//std::cout << std::endl;
-
-
-	Matrix C1 = cpu_matrix_mult(rand_matrix_1, rand_matrix_2);
-	Matrix C2 = MatMul(rand_matrix_1, rand_matrix_2);
-	Matrix C3 = MatMulSH(rand_matrix_1, rand_matrix_2);
-
-	C1.equal(C2);
-	C1.equal(C3);
-
+	Matrix::equal(rand_matrix_1, rand_matrix_2);
     return 0;
 }

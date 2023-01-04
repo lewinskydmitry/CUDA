@@ -22,4 +22,7 @@ public:
     static void print_matrix(Matrix matrix);
     static Matrix create_matrix(int length, int width, int min, int max);
     int equal(Matrix comp_matrix);
+    void T();
+    static Matrix transpose(Matrix init);
+    static int equal(Matrix A, Matrix B);
 };

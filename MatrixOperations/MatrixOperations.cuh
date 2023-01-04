@@ -31,3 +31,9 @@ Matrix MatMul(Matrix A, Matrix B);
 //-------------------------------------------------------------
 
 Matrix MatMulSH(const Matrix A, const Matrix B);
+
+//-------------------------------------------------------------
+// SHARED MEMORY GPU MATRIX TRANSPOSE
+//-------------------------------------------------------------
+
+Matrix MatTranspose(Matrix A);
