@@ -27,12 +27,12 @@ int main() {
 
 	//// Generate random matrixes
 	//std::cout << "Random matrix 1" << std::endl;
-	Matrix rand_matrix_1 = Matrix::create_matrix(16, 8, 0, 5);
+	Matrix rand_matrix_1 = Matrix::create_matrix(23, 6, 0, 5);
 	//rand_matrix_1.print();
 	//std::cout << std::endl;
 
 	//std::cout << "Random matrix 2" << std::endl;
-	Matrix rand_matrix_2 = Matrix::create_matrix(8, 16, 0, 5);
+	Matrix rand_matrix_2 = Matrix::create_matrix(6, 23, 0, 5);
 	//rand_matrix_2.print();
 	//std::cout << std::endl;
 

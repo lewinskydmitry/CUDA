@@ -50,7 +50,7 @@ Matrix MatMul(Matrix A, Matrix B)
 
     // Invoke kernel
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-    dim3 dimGrid(B.width / dimBlock.x, A.length / dimBlock.y);
+    dim3 dimGrid((B.width + dimBlock.x - 1) / dimBlock.x, (A.length + dimBlock.y - 1) / dimBlock.y);
     MatMulKernel << <dimGrid, dimBlock >> > (d_A, d_B, d_C);
 
     Matrix C;

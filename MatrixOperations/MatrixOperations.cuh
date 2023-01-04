@@ -5,7 +5,7 @@
 #include <iostream>
 #include "../Matrix/Matrix.h"
 #include <stdexcept>
-#define BLOCK_SIZE 8
+#define BLOCK_SIZE 16
 
 
 //-------------------------------------------------------------
