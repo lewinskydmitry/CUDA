@@ -1,19 +1,15 @@
 #include "MatrixOperations.cuh"
 
-__global__ void copySharedMem(Matrix odata, const Matrix idata)
+__global__ void copySharedMem(Matrix output, const Matrix input)
 {
     __shared__ double tile[BLOCK_SIZE * BLOCK_SIZE];
 
     int x = blockIdx.x * BLOCK_SIZE + threadIdx.x;
     int y = blockIdx.y * BLOCK_SIZE + threadIdx.y;
 
-    for (int j = 0; j < BLOCK_SIZE; j += BLOCK_SIZE)
-        tile[(threadIdx.y + j) * BLOCK_SIZE + threadIdx.x] = idata.data[(y + j) * idata.width + x];
-
+    tile[(threadIdx.y + j) * BLOCK_SIZE + threadIdx.x] = input.data[(y + j) * input.width + x];
     __syncthreads();
-
-    for (int j = 0; j < BLOCK_SIZE; j += BLOCK_SIZE)
-        odata.data[(y + j) * odata.width + x] = tile[(threadIdx.x + j) * BLOCK_SIZE + threadIdx.y];
+    output.data[(y + j) * output.width + x] = tile[(threadIdx.x + j) * BLOCK_SIZE + threadIdx.y];
 }
 
 
@@ -41,9 +37,8 @@ Matrix MatTranspose(Matrix A)
     C.width = A.length;
     C.data = new double[size];
 
-    // Read C from device memory
     cudaMemcpy(C.data, d_C.data, size * sizeof(double), cudaMemcpyDeviceToHost);
-    // Free device memory
+
     cudaFree(d_A.data);
     cudaFree(d_C.data);
     return C;

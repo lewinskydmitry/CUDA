@@ -105,13 +105,11 @@ Matrix MatMulSH(const Matrix A, const Matrix B)
     cudaMalloc(&d_B.data, size * sizeof(double));
     cudaMemcpy(d_B.data, B.data, size * sizeof(double), cudaMemcpyHostToDevice);
 
-    // Allocate C in device memory
     Matrix d_C;
     d_C.width = B.width; d_C.length = A.length, d_C.stride = B.width;
     size = B.width * A.length;
     cudaMalloc(&d_C.data, size * sizeof(double));
 
-    // Invoke kernel
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
     dim3 dimGrid((B.width + dimBlock.x - 1) / dimBlock.x, (A.length + dimBlock.y - 1) / dimBlock.y);
     MatMulKernelSH <<< dimGrid, dimBlock >>> (d_A, d_B, d_C);
@@ -121,9 +119,9 @@ Matrix MatMulSH(const Matrix A, const Matrix B)
     C.width = B.width;
     size = A.length * B.width;
     C.data = new double[size];
-    // Read C from device memory
+
     cudaMemcpy(C.data, d_C.data, size * sizeof(double), cudaMemcpyDeviceToHost);
-    // Free device memory
+
     cudaFree(d_A.data);
     cudaFree(d_B.data);
     cudaFree(d_C.data);

@@ -44,7 +44,7 @@ Matrix AddMatrix(Matrix A, Matrix B) {
 
 
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-    dim3 dimGrid(ceil((float)A.width / (float)dimBlock.x), ceil((float)A.length / (float)dimBlock.y));
+    dim3 dimGrid((A.width + dimBlock.x - 1) / dimBlock.x, (A.length + dimBlock.y - 1) / dimBlock.y);
     
     cudaAddMatrixKernel << < dimGrid, dimBlock >> > (d_A, d_B, d_C);
 
