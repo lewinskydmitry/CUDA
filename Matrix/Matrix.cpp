@@ -32,7 +32,7 @@ void Matrix::create_data(std::vector< std::vector<double> > vector2d, Matrix mat
 
 void Matrix::print() {
     for (int i = 0; i < length * width; i++) {
-        if ((i + 1) % width == 0 && i != 0) {
+        if ((i + 1) % width == 0 && i != 0 || width == 1) {
             std::cout << data[i] << "\n";
         }
         else {

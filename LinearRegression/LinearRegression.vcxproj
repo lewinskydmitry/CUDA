@@ -11,12 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{4C5DCE62-1565-434B-900C-6947F29954CB}</ProjectGuid>
-    <RootNamespace>CudaProject</RootNamespace>
+    <ProjectGuid>{ABE7590B-0BE2-4FB3-AB25-2C17C465F818}</ProjectGuid>
+    <RootNamespace>LinearRegression</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
@@ -77,22 +78,18 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="LinearRegression.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LinearRegression\LinearRegression.vcxproj">
-      <Project>{abe7590b-0be2-4fb3-ab25-2c17c465f818}</Project>
-    </ProjectReference>
+    <ClInclude Include="LinearRegression.cuh" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\MatrixOperations\MatrixOperations.vcxproj">
       <Project>{d1228e13-3b9b-49b2-9a8a-010ddf7f6d3a}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Matrix\Matrix.vcxproj">
       <Project>{b38400dc-4095-4585-a375-2fcf67b8ae19}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="X.csv" />
-    <None Include="y.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
