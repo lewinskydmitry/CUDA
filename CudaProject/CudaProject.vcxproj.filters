@@ -9,13 +9,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="A.csv">
+    <None Include="X.csv">
       <Filter>data</Filter>
     </None>
-    <None Include="B.csv">
-      <Filter>data</Filter>
-    </None>
-    <None Include="D.csv">
+    <None Include="y.csv">
       <Filter>data</Filter>
     </None>
   </ItemGroup>

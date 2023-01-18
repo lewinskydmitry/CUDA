@@ -1,18 +1,14 @@
 ﻿#include "../Matrix/Matrix.h"
 #include "../MatrixOperations/MatrixOperations.cuh"
+#include "../LinearRegression/LinearRegression.cuh"
 
 
 int main() {
-	Matrix rand_matrix_1 = Matrix::create_matrix(2, 4, 0, 5);
-	Matrix rand_matrix_2 = Matrix::create_matrix(3, 3, 0, 5);
+	Matrix X = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/X.csv",',');
+	Matrix y = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/y.csv", ',');
 
-	rand_matrix_1.print();
-	std::cout << "\n";
+	Matrix C = fit(X, y, 30);
+	C.print();
 
-	Matrix A = MatTranspose(rand_matrix_1);
-	A.print();
-
-
-	Matrix::equal(A, Matrix::transpose(rand_matrix_1));
     return 0;
 }

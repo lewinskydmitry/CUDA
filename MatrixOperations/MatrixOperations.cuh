@@ -6,7 +6,8 @@
 #include "../Matrix/Matrix.h"
 #include <stdexcept>
 #define BLOCK_SIZE 16
-
+#define threadsPerBlock 256
+#define THETA 0.00001
 
 //-------------------------------------------------------------
 // GPU MATRIX ADDITION
@@ -31,6 +32,7 @@ Matrix MatMul(Matrix A, Matrix B);
 //-------------------------------------------------------------
 
 Matrix MatMulSH(const Matrix A, const Matrix B);
+__global__ void MatMulKernelSH(Matrix A, Matrix B, Matrix C);
 
 //-------------------------------------------------------------
 // SHARED MEMORY GPU MATRIX TRANSPOSE
