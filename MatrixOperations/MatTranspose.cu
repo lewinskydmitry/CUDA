@@ -1,6 +1,6 @@
 #include "MatrixOperations.cuh"
 
-__global__ void copySharedMem(Matrix odata, const Matrix idata)
+__global__ void TransposeKernel(Matrix odata, const Matrix idata)
 {
     __shared__ double tile[BLOCK_SIZE * BLOCK_SIZE];
 
@@ -17,7 +17,7 @@ __global__ void copySharedMem(Matrix odata, const Matrix idata)
 }
 
 
-Matrix MatTranspose(Matrix A)
+Matrix Transpose(Matrix A)
 {
     Matrix d_A;
     d_A.width = A.width; d_A.length = A.length;
@@ -34,7 +34,7 @@ Matrix MatTranspose(Matrix A)
     // Invoke kernel
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
     dim3 dimGrid((A.width + dimBlock.x - 1) / dimBlock.x, (A.length + dimBlock.y - 1) / dimBlock.y);
-    copySharedMem << <dimGrid, dimBlock >> > (d_C, d_A);
+    TransposeKernel << <dimGrid, dimBlock >> > (d_C, d_A);
 
     Matrix C;
     C.length = A.width;

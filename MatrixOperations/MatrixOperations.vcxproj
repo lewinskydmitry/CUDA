@@ -78,10 +78,13 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="MatMulGPU.cu" />
-    <CudaCompile Include="MatMulGPU_SH.cu" />
+    <CudaCompile Include="AddMatrixRep.cu" />
+    <CudaCompile Include="MatMulNaive.cu" />
+    <CudaCompile Include="MatMul.cu" />
     <CudaCompile Include="MatTranspose.cu" />
-    <CudaCompile Include="VectorAddGPU.cu" />
+    <CudaCompile Include="AddMatrix.cu" />
+    <CudaCompile Include="SubMatrix.cu" />
+    <CudaCompile Include="SubMatrixRep.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MatrixOperations.cuh" />
@@ -90,9 +93,6 @@
     <ProjectReference Include="..\Matrix\Matrix.vcxproj">
       <Project>{b38400dc-4095-4585-a375-2fcf67b8ae19}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="MatMulCPU.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

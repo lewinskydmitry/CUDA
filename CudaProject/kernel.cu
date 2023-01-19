@@ -4,11 +4,11 @@
 
 
 int main() {
-	Matrix X = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/X.csv",',');
-	Matrix y = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/y.csv", ',');
-
-	Matrix C = fit(X, y, 30);
-	C.print();
+	// Test linear regression
+	Matrix X_lin = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/data_linear/X.csv",',');
+	Matrix y_lin = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/data_linear/y.csv", ',');
+	Matrix C_lin = fit(X_lin, y_lin, 30);
+	C_lin.print();
 
     return 0;
 }

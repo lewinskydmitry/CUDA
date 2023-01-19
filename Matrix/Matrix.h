@@ -25,4 +25,5 @@ public:
     void T();
     static Matrix transpose(Matrix init);
     static int equal(Matrix A, Matrix B);
+    static Matrix MatMul(Matrix A, Matrix B);
 };

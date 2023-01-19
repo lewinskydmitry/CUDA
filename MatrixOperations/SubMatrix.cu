@@ -1,8 +1,7 @@
 #include "MatrixOperations.cuh"
 
 
-__global__
-void cudaAddMatrixKernel(const Matrix A, const Matrix B, Matrix C) 
+__global__ void SubMatrixKernel(const Matrix A, const Matrix B, Matrix C)
 {
     int size = A.width * A.length;
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -13,7 +12,7 @@ void cudaAddMatrixKernel(const Matrix A, const Matrix B, Matrix C)
 }
 
 
-Matrix AddMatrix(Matrix A, Matrix B) {
+Matrix SubMatrix(Matrix A, Matrix B) {
 
     if (A.length != B.length && A.width != B.width) {
         try {
@@ -43,10 +42,8 @@ Matrix AddMatrix(Matrix A, Matrix B) {
     cudaMalloc(&d_C.data, size * sizeof(double));
 
 
-    dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-    dim3 dimGrid(ceil((float)A.width / (float)dimBlock.x), ceil((float)A.length / (float)dimBlock.y));
-    
-    cudaAddMatrixKernel << < dimGrid, dimBlock >> > (d_A, d_B, d_C);
+    int blocksPerGrid = (d_A.width * d_A.length + threadsPerBlock - 1) / threadsPerBlock;
+    SubMatrixKernel << < blocksPerGrid, threadsPerBlock >> > (d_A, d_B, d_C);
 
     Matrix C;
     C.width = B.width; C.length = B.length;

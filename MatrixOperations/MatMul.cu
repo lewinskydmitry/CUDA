@@ -1,21 +1,15 @@
 ﻿#include "MatrixOperations.cuh"
 
-
 __device__ float GetElement(const Matrix A, int row, int col)
 {
     return A.data[row * A.stride + col];
 }
-
 
 __device__ void SetElement(Matrix A, int row, int col, double value)
 {
     A.data[row * A.stride + col] = value;
 }
 
-
-// Get the BLOCK_SIZExBLOCK_SIZE sub-matrix Asub of A that is
-// located col sub-matrices to the right and row sub-matrices down
-// from the upper-left corner of A
 __device__ Matrix GetMatrix(Matrix A, int row, int col)
 {
     Matrix Asub;
@@ -27,7 +21,8 @@ __device__ Matrix GetMatrix(Matrix A, int row, int col)
 }
 
 
-__global__ void MatMulKernelSH(Matrix A, Matrix B, Matrix C)
+
+__global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 {
     int blockRow = blockIdx.y;
     int blockCol = blockIdx.x;
@@ -77,7 +72,8 @@ __global__ void MatMulKernelSH(Matrix A, Matrix B, Matrix C)
 }
 
 
-Matrix MatMulSH(const Matrix A, const Matrix B)
+
+Matrix MatMul(const Matrix A, const Matrix B)
 {
 
     if (A.width != B.length) {
@@ -91,8 +87,6 @@ Matrix MatMulSH(const Matrix A, const Matrix B)
         }
     }
 
-
-    // Load A and B to device memory
     Matrix d_A;
     d_A.width = A.width; d_A.length = A.length, d_A.stride = A.width;
     size_t size = A.width * A.length;
@@ -105,7 +99,6 @@ Matrix MatMulSH(const Matrix A, const Matrix B)
     cudaMalloc(&d_B.data, size * sizeof(double));
     cudaMemcpy(d_B.data, B.data, size * sizeof(double), cudaMemcpyHostToDevice);
 
-    // Allocate C in device memory
     Matrix d_C;
     d_C.width = B.width; d_C.length = A.length, d_C.stride = B.width;
     size = B.width * A.length;
@@ -114,16 +107,15 @@ Matrix MatMulSH(const Matrix A, const Matrix B)
     // Invoke kernel
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
     dim3 dimGrid((B.width + dimBlock.x - 1) / dimBlock.x, (A.length + dimBlock.y - 1) / dimBlock.y);
-    MatMulKernelSH <<< dimGrid, dimBlock >>> (d_A, d_B, d_C);
+    MatMulKernel <<< dimGrid, dimBlock >>> (d_A, d_B, d_C);
 
     Matrix C;
-    C.length = A.length;
-    C.width = B.width;
+    C.length = A.length; C.width = B.width;
     size = A.length * B.width;
     C.data = new double[size];
-    // Read C from device memory
+
     cudaMemcpy(C.data, d_C.data, size * sizeof(double), cudaMemcpyDeviceToHost);
-    // Free device memory
+
     cudaFree(d_A.data);
     cudaFree(d_B.data);
     cudaFree(d_C.data);

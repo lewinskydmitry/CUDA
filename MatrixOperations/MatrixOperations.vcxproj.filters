@@ -1,17 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CudaCompile Include="MatMulGPU.cu">
-      <Filter>Source Files</Filter>
+    <CudaCompile Include="AddMatrixRep.cu">
+      <Filter>Source Files\Matrix summation</Filter>
     </CudaCompile>
-    <CudaCompile Include="MatMulGPU_SH.cu">
-      <Filter>Source Files</Filter>
+    <CudaCompile Include="AddMatrix.cu">
+      <Filter>Source Files\Matrix summation</Filter>
     </CudaCompile>
-    <CudaCompile Include="VectorAddGPU.cu">
-      <Filter>Source Files</Filter>
+    <CudaCompile Include="SubMatrix.cu">
+      <Filter>Source Files\Matrix subtraction</Filter>
+    </CudaCompile>
+    <CudaCompile Include="SubMatrixRep.cu">
+      <Filter>Source Files\Matrix subtraction</Filter>
     </CudaCompile>
     <CudaCompile Include="MatTranspose.cu">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Matrix trasposition</Filter>
+    </CudaCompile>
+    <CudaCompile Include="MatMulNaive.cu">
+      <Filter>Source Files\Matrix multiplication</Filter>
+    </CudaCompile>
+    <CudaCompile Include="MatMul.cu">
+      <Filter>Source Files\Matrix multiplication</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
@@ -21,15 +30,22 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{4b8d6c92-dc20-4eb8-ac53-21153f818a06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Matrix summation">
+      <UniqueIdentifier>{2f26bf02-a505-4bbe-b97f-2e755e5d3420}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Matrix subtraction">
+      <UniqueIdentifier>{9b1141f3-fece-4b5b-9a3d-0a9067a4a3f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Matrix trasposition">
+      <UniqueIdentifier>{408a68e2-01f2-4022-a9d3-b8c494497fc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Matrix multiplication">
+      <UniqueIdentifier>{0c054f03-1024-4ad7-9baa-9db505619f13}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MatrixOperations.cuh">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="MatMulCPU.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
