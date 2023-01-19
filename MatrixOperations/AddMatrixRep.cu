@@ -12,7 +12,7 @@ __global__ void AddMatrixRepKernel(Matrix A, Matrix B)
 }
 
 
-Matrix AddMatrixRep(Matrix A, Matrix B) {
+void AddMatrixRep(Matrix A, Matrix B) {
 
     if (A.length != B.length && A.width != B.width) {
         try {

@@ -22,6 +22,9 @@
     <CudaCompile Include="MatMul.cu">
       <Filter>Source Files\Matrix multiplication</Filter>
     </CudaCompile>
+    <CudaCompile Include="MatTransposeRep.cu">
+      <Filter>Source Files\Matrix trasposition</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

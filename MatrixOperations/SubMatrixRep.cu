@@ -6,13 +6,13 @@ __global__ void SubMatrixRepKernel(Matrix A, Matrix B)
     int size = A.width * A.length;
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
     while (thread_idx < size) {
-        A.data[thread_idx] += B.data[thread_idx];
+        A.data[thread_idx] -= B.data[thread_idx];
         thread_idx += blockDim.x * gridDim.x;
     }
 }
 
 
-Matrix SubMatrixRep(Matrix A, Matrix B) {
+void SubMatrixRep(Matrix A, Matrix B) {
 
     if (A.length != B.length && A.width != B.width) {
         try {

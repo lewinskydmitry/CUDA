@@ -83,6 +83,7 @@
     <CudaCompile Include="MatMul.cu" />
     <CudaCompile Include="MatTranspose.cu" />
     <CudaCompile Include="AddMatrix.cu" />
+    <CudaCompile Include="MatTransposeRep.cu" />
     <CudaCompile Include="SubMatrix.cu" />
     <CudaCompile Include="SubMatrixRep.cu" />
   </ItemGroup>

@@ -1,19 +1,19 @@
 #include "MatrixOperations.cuh"
 
-__global__ void TransposeKernel(Matrix odata, const Matrix idata)
+__global__ void TransposeKernelRep(Matrix Matrixdata)
 {
     __shared__ double tile[BLOCK_SIZE * BLOCK_SIZE];
 
     int x = blockIdx.x * BLOCK_SIZE + threadIdx.x;
     int y = blockIdx.y * BLOCK_SIZE + threadIdx.y;
 
-    tile[threadIdx.y * BLOCK_SIZE + threadIdx.x] = idata.data[y* idata.width + x];
+    tile[threadIdx.y * BLOCK_SIZE + threadIdx.x] = Matrixdata.data[y * Matrixdata.width + x];
     __syncthreads();
-    odata.data[y * odata.width + x] = tile[threadIdx.x * BLOCK_SIZE + threadIdx.y];
+    Matrixdata.data[y * Matrixdata.width + x] = tile[threadIdx.x * BLOCK_SIZE + threadIdx.y];
 }
 
 
-Matrix Transpose(Matrix A)
+void TransposeRep(Matrix A)
 {
     Matrix d_A;
     d_A.width = A.width; d_A.length = A.length;
@@ -21,26 +21,13 @@ Matrix Transpose(Matrix A)
     cudaMalloc(&d_A.data, size * sizeof(double));
     cudaMemcpy(d_A.data, A.data, size * sizeof(double), cudaMemcpyHostToDevice);
 
-    Matrix d_C;
-    d_C.length = A.width;
-    d_C.width = A.length;
-    size = A.length * A.width;
-    cudaMalloc(&d_C.data, size * sizeof(double));
-
     // Invoke kernel
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
     dim3 dimGrid((A.width + dimBlock.x - 1) / dimBlock.x, (A.length + dimBlock.y - 1) / dimBlock.y);
-    TransposeKernel << <dimGrid, dimBlock >> > (d_C, d_A);
-
-    Matrix C;
-    C.length = A.width;
-    C.width = A.length;
-    C.data = new double[size];
+    TransposeKernelRep << <dimGrid, dimBlock >> > (d_A);
 
     // Read C from device memory
-    cudaMemcpy(C.data, d_C.data, size * sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(A.data, d_A.data, size * sizeof(double), cudaMemcpyDeviceToHost);
     // Free device memory
     cudaFree(d_A.data);
-    cudaFree(d_C.data);
-    return C;
 }
