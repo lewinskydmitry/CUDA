@@ -5,14 +5,14 @@ __global__ void bias_update(Matrix difference, Matrix bias, float THETA)
 {
     int size = difference.width * difference.length;
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
+    double result = 0;
 
-    while (thread_idx < size) {
-        double result = 0;
-        for (int i = 0; i < size; i++) {
-            result += difference.data[thread_idx] / difference.length;
-        }
-        bias.data[thread_idx] = THETA * 2 * result;
-        thread_idx += blockDim.x * gridDim.x;
+    for (int i = 0; i < size; i++) {
+        result -= THETA * difference.data[i] / difference.length;
+    }
+
+    if (thread_idx < size) {
+        bias.data[thread_idx] = result;
     }
 }
 
@@ -22,20 +22,45 @@ __global__ void weights_update(Matrix weights, Matrix weightsGrad, float THETA)
     int size = weightsGrad.width * weightsGrad.length;
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-    while (thread_idx < size) {
-        weights.data[thread_idx] += THETA * 2 * weightsGrad.data[thread_idx] / weightsGrad.length;
-        thread_idx += blockDim.x * gridDim.x;
+    if (thread_idx < size) {
+        weights.data[thread_idx] -= THETA * weightsGrad.data[thread_idx] / 300;
     }
 }
 
 
 __global__ void LossFunc(Matrix erMatrix, Matrix difference, int iteration) {
     int size = difference.width * difference.length;
-    float error = 0;
+    int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
+    
     for (int e = 0; e < size; e++) {
-        error += pow(difference.data[e], 2) / difference.length;
+        erMatrix.data[iteration] += pow(difference.data[e], 2) / difference.length;
     }
-    erMatrix.data[iteration] = error;
+}
+
+
+__global__ void LossFuncRed(Matrix erMatrix, Matrix difference, int iteration) {
+
+    int size = difference.width * difference.length;
+    extern __shared__ double sdata[];
+    unsigned int tid = threadIdx.x;
+    unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+    sdata[tid] = 0;
+
+    if (i < size) {
+        sdata[tid] = pow(difference.data[i],2) / difference.length;
+    }
+    __syncthreads();
+
+    for (unsigned int s = 1; s < blockDim.x; s *= 2) {
+        if (tid % (2 * s) == 0) {
+            sdata[tid] += sdata[tid + s];
+        }
+        __syncthreads();
+    }
+
+    if (tid == 0) {
+        erMatrix.data[iteration] = sdata[0];
+    }
 }
 
 
@@ -55,11 +80,11 @@ Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
     // VARIABLES FOR OPTIMIZATION
     Matrix d_w;
     d_w.width = y.width; d_w.length = X.width; d_w.stride = y.width;
-    cudaMalloc(&d_w.data, X.length * sizeof(double));
+    cudaMalloc(&d_w.data, y.length * sizeof(double));
 
     Matrix d_wGrad;
     d_wGrad.width = y.width; d_wGrad.length = X.width; d_wGrad.stride = y.width;
-    cudaMalloc(&d_wGrad.data, X.length * sizeof(double));
+    cudaMalloc(&d_wGrad.data, y.length * sizeof(double));
 
     Matrix d_b;
     d_w.width = y.width; d_w.length = y.length; d_w.stride = y.width;
@@ -80,6 +105,7 @@ Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
     Matrix d_error;
     d_error.width = 1; d_error.length = epochs;
     cudaMalloc(&d_error.data, epochs * sizeof(double));
+    cudaMemset(&d_error, 0, epochs * sizeof(double));
 
 
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
@@ -102,17 +128,20 @@ Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
         //------------------------------------------------------------
         // Calculate loss
         //------------------------------------------------------------
-        SubMatrixKernel << < blocksPerGrid, threadsPerBlock >> > (d_y, d_pred, d_difference);
+        SubMatrixKernel << < blocksPerGrid, threadsPerBlock >> > (d_pred, d_y, d_difference);
 
 
         //---------BACKWARD PASS--------------------------
-        LossFunc << < 1, 1 >> > (d_error, d_difference, epoch);
+        //LossFuncRed << < blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(double) >> > (d_error, d_difference, epoch);
+        LossFunc << < 1,1 >> > (d_error, d_difference, epoch);
         bias_update << < blocksPerGrid, threadsPerBlock >> > (d_difference, d_b, THETA);
         TransposeKernelRep << < dimGrid, dimBlock >> > (d_X);
         MatMulKernel << < dimGrid, dimBlock >> > (d_X, d_difference, d_wGrad);
         TransposeKernelRep << < dimGrid, dimBlock >> > (d_X);
         weights_update << < blocksPerGrid, threadsPerBlock >> > (d_w, d_wGrad, THETA);
+
     }
+    
 
 
     Matrix result;

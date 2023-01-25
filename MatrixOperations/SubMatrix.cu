@@ -5,9 +5,8 @@ __global__ void SubMatrixKernel(const Matrix A, const Matrix B, Matrix C)
 {
     int size = A.width * A.length;
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
-    while (thread_idx < size) {
+    if (thread_idx < size) {
         C.data[thread_idx] = A.data[thread_idx] - B.data[thread_idx];
-        thread_idx += blockDim.x * gridDim.x;
     }
 }
 
