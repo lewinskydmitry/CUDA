@@ -28,12 +28,13 @@ void test(int value) {
 	{
 		LinearRegression reg;
 		Matrix C_lin = reg.fit(X_lin, y_lin, 1000);
-		reg.b.print();
+		reg.losses.print();
 	}
 }
 
 
 int main() {
 	test(0);
- //   return 0;
+
+    return 0;
 }

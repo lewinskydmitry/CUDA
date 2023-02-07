@@ -1,15 +1,15 @@
 #include "MatrixOperations.cuh"
 
-__global__ void TransposeKernelRep(Matrix Matrixdata)
+__global__ void TransposeKernelRep(Matrix Matrix)
 {
     __shared__ double tile[BLOCK_SIZE * BLOCK_SIZE];
 
     int x = blockIdx.x * BLOCK_SIZE + threadIdx.x;
     int y = blockIdx.y * BLOCK_SIZE + threadIdx.y;
 
-    tile[threadIdx.y * BLOCK_SIZE + threadIdx.x] = Matrixdata.data[y * Matrixdata.width + x];
+    tile[threadIdx.y * BLOCK_SIZE + threadIdx.x] = Matrix.data[y * Matrix.width + x];
     __syncthreads();
-    Matrixdata.data[y * Matrixdata.width + x] = tile[threadIdx.x * BLOCK_SIZE + threadIdx.y];
+    Matrix.data[y * Matrix.width + x] = tile[threadIdx.x * BLOCK_SIZE + threadIdx.y];
 }
 
 

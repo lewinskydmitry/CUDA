@@ -1,30 +1,13 @@
 ﻿#include "LinearRegression.cuh"
 
 
-
-__global__ void bias_update(Matrix difference, Matrix bias, double* THETA)
-{
-    int size = difference.width * difference.length;
-    int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
-    double result = 0;
-
-    for (int i = 0; i < size; i++) {
-        result += 2 * *THETA * difference.data[i] / difference.length;
-    }
-
-    for (int i = 0; i < size; i++) {
-        bias.data[i] -= result;
-    }
-}
-
-
-__global__ void clear_matrix(Matrix matrix)
+__global__ void broadcast(Matrix matrix, double value)
 {
     int size = matrix.width * matrix.length;
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_idx < size) {
-        matrix.data[thread_idx] = 0;
+        matrix.data[thread_idx] = value;
     }
 }
 
@@ -36,8 +19,8 @@ __global__ void step_control(Matrix d_error, Matrix weights, Matrix b,  int epoc
 
     if (d_error.data[epoch - 1] * 1.2 < d_error.data[epoch] && epoch != 0) {
         *THETA = *THETA / 10;
-        clear_matrix << < blocksPerGrid_w, threadsPerBlock >> > (weights);
-        clear_matrix << < blocksPerGrid_b, threadsPerBlock >> > (b);
+        broadcast << < blocksPerGrid_w, threadsPerBlock >> > (weights, 0);
+        broadcast << < blocksPerGrid_b, threadsPerBlock >> > (b, 0);
     }
 }
 
@@ -49,6 +32,34 @@ __global__ void weights_update(Matrix weights, Matrix weightsGrad, double* THETA
 
     if (thread_idx < size) {
         weights.data[thread_idx] += 2 * *THETA * (weightsGrad.data[thread_idx] / length_data + 2 * weights.data[thread_idx]);
+    }
+}
+
+
+__global__ void bias_update(Matrix difference, Matrix bias, double* THETA)
+{
+    int size = difference.width * difference.length;
+    
+    extern __shared__ double sdata[];
+    unsigned int tid = threadIdx.x;
+    unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+    sdata[tid] = 0;
+
+    if (i < size) {
+        sdata[tid] = 2 * *THETA * difference.data[i] / difference.length;
+    }
+    __syncthreads();
+
+    for (unsigned int s = 1; s < blockDim.x; s *= 2) {
+        if (tid % (2 * s) == 0) {
+            sdata[tid] += sdata[tid + s];
+        }
+        __syncthreads();
+    }
+
+    if (i == 0) {
+        int blocksPerGrid_b = (bias.width * bias.length + threadsPerBlock - 1) / threadsPerBlock;
+        broadcast << < blocksPerGrid_b, threadsPerBlock >> > (bias, bias.data[0] - sdata[0]);
     }
 }
 
@@ -82,9 +93,10 @@ __global__ void LossFuncRed(Matrix erMatrix, Matrix difference, int iteration) {
 
 Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
 
-    // INIT MATRICES
+    // Calculate transpose X matrix for future calculation
     Matrix XT = Transpose(X);
 
+    // INIT MATRIXES AND VARIABLES
     Matrix d_X;
     d_X.width = X.width; d_X.length = X.length; d_X.stride = X.width;
     cudaMalloc(&d_X.data, X.width * X.length * sizeof(double));
@@ -104,30 +116,28 @@ Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
     cudaMalloc(&d_y.data, y.width * y.length * sizeof(double));
     cudaMemcpy(d_y.data, y.data, y.width * y.length * sizeof(double), cudaMemcpyHostToDevice);
 
-    // VARIABLES FOR OPTIMIZATION
+    // WEIGHTS AND BIAS
     Matrix d_w;
     d_w.width = y.width; d_w.length = X.width; d_w.stride = y.width;
     cudaMalloc(&d_w.data, X.width * sizeof(double));
     cudaMemset(d_w.data, 0, X.width * sizeof(double));
 
-    Matrix d_wGrad;
-    d_wGrad.width = y.width; d_wGrad.length = X.width; d_wGrad.stride = y.width;
-    cudaMalloc(&d_wGrad.data, X.width * sizeof(double));
-
     Matrix d_b;
     d_b.width = y.width; d_b.length = y.length; d_b.stride = y.width;
     cudaMalloc(&d_b.data, y.width * y.length * sizeof(double));
 
-    // VARIABLES FOR COMPUTING
+    // VARIABLES FOR OPTIMIZATION
     Matrix d_pred;
     d_pred.width = y.width; d_pred.length = y.length; d_pred.stride = y.width;
     cudaMalloc(&d_pred.data, y.width * y.length * sizeof(double));
 
     Matrix d_difference;
-    d_difference.width = y.width; 
-    d_difference.length = y.length;
-    d_difference.stride = y.width;
+    d_difference.width = y.width; d_difference.length = y.length; d_difference.stride = y.width;
     cudaMalloc(&d_difference.data, y.width * y.length * sizeof(double));
+
+    Matrix d_wGrad;
+    d_wGrad.width = y.width; d_wGrad.length = X.width; d_wGrad.stride = y.width;
+    cudaMalloc(&d_wGrad.data, X.width * sizeof(double));
 
     // ERROR COUNTING
     Matrix d_error;
@@ -144,36 +154,29 @@ Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
     for (int epoch = 0; epoch < epochs; epoch++) {
 
         //---------FORWARD PASS--------------------------
-        //------------------------------------------------------------
-        // Multyply X*w
-        //------------------------------------------------------------
-        
+        // Calculate predict
         MatMulKernel << < dimGrid, dimBlock >> > (d_X, d_w, d_pred);
-
-        //------------------------------------------------------------
         // Add bias
-        //------------------------------------------------------------
         AddMatrixRepKernel << < blocksPerGrid, threadsPerBlock >> > (d_pred, d_b);
-
-        //------------------------------------------------------------
         // Calculate loss
-        //------------------------------------------------------------
         SubMatrixKernel << < blocksPerGrid, threadsPerBlock >> > (d_y, d_pred, d_difference);
 
-
         //---------BACKWARD PASS--------------------------
+        // Calculate loss
         LossFuncRed << < blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(double) >> > (d_error, d_difference, epoch);
-        bias_update << < 1,1 >> > (d_difference, d_b, THETA);
+        // Update bias
+        bias_update << < blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(double) >> > (d_difference, d_b, THETA);
+        // Update weights
         MatMulKernel << < dimGrid, dimBlock >> > (d_XT, d_difference, d_wGrad);
         weights_update << < blocksPerGrid, threadsPerBlock >> > (d_w, d_wGrad, THETA, y.length);
+        // check step
         step_control << < 1, 1 >> > (d_error, d_w, d_b, epoch, THETA);
     }
     
-
-    Matrix result;
-    result.width = y.width; result.length = y.length;
-    result.data = new double[result.width * result.length];
-    cudaMemcpy(result.data, d_difference.data, result.width * result.length * sizeof(double), cudaMemcpyDeviceToHost);
+    // ASSIGNING DEVICE VARIABLES AFTER COMPUTING
+    difference.width = y.width; difference.length = y.length;
+    difference.data = new double[difference.width * difference.length];
+    cudaMemcpy(difference.data, d_difference.data, difference.width * difference.length * sizeof(double), cudaMemcpyDeviceToHost);
 
     losses.width = 1; losses.length = epochs;
     losses.data = new double[epochs];
@@ -187,14 +190,11 @@ Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
     b.data = new double[y.length];
     cudaMemcpy(b.data, d_b.data, y.length * sizeof(double), cudaMemcpyDeviceToHost);
 
-    gradW.width = y.width; gradW.length = X.width;
-    gradW.data = new double[X.width];
-    cudaMemcpy(gradW.data, d_wGrad.data, X.width * sizeof(double), cudaMemcpyDeviceToHost);
-
     predict.width = y.width; predict.length = y.length;
     predict.data = new double[y.length];
     cudaMemcpy(predict.data, d_pred.data, y.length * sizeof(double), cudaMemcpyDeviceToHost);
 
+    // FREE MEMORY
     cudaFree(d_X.data);
     cudaFree(d_XT.data);
     cudaFree(d_y.data);
@@ -207,5 +207,5 @@ Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
     cudaFree(d_error.data);
     cudaFree(THETA);
 
-    return result;
+    return predict;
 };

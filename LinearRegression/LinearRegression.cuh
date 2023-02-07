@@ -7,11 +7,10 @@
 
 class LinearRegression {
 public:
-	Matrix result;
+	Matrix difference;
 	Matrix losses;
 	Matrix grads;
 	Matrix b;
-	Matrix gradW;
 	Matrix predict;
 	double h_THETA = 0.1;
 	Matrix fit(Matrix X, Matrix y, int epoch);
