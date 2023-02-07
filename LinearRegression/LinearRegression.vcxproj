@@ -81,6 +81,7 @@
     <CudaCompile Include="LinearRegression.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
+    <CudaCompile Include="Loss function.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LinearRegression.cuh" />

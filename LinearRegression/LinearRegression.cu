@@ -25,13 +25,13 @@ __global__ void step_control(Matrix d_error, Matrix weights, Matrix b,  int epoc
 }
 
 
-__global__ void weights_update(Matrix weights, Matrix weightsGrad, double* THETA, int length_data)
+__global__ void weights_update(Matrix weights, Matrix weightsGrad, double* THETA, int length_data, double REG_TERM)
 {
     int size = weightsGrad.width * weightsGrad.length;
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_idx < size) {
-        weights.data[thread_idx] += 2 * *THETA * (weightsGrad.data[thread_idx] / length_data + 2 * weights.data[thread_idx]);
+        weights.data[thread_idx] += 2 * *THETA * (weightsGrad.data[thread_idx] / length_data + REG_TERM * weights.data[thread_idx]);
     }
 }
 
@@ -63,18 +63,18 @@ __global__ void bias_update(Matrix difference, Matrix bias, double* THETA)
     }
 }
 
+__global__ void CalcRegTerm(Matrix weights, double* reg_value, double REG_TERM){
 
-__global__ void LossFuncRed(Matrix erMatrix, Matrix difference, int iteration) {
-
-    int size = difference.width * difference.length;
+    int size = weights.width * weights.length;
     extern __shared__ double sdata[];
     unsigned int tid = threadIdx.x;
     unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
     sdata[tid] = 0;
 
     if (i < size) {
-        sdata[tid] = pow(difference.data[i], 2) / difference.length;
+        sdata[tid] =  pow(weights.data[i], 2);
     }
+
     __syncthreads();
 
     for (unsigned int s = 1; s < blockDim.x; s *= 2) {
@@ -85,7 +85,33 @@ __global__ void LossFuncRed(Matrix erMatrix, Matrix difference, int iteration) {
     }
 
     if (tid == 0) {
-        erMatrix.data[iteration] = sdata[0];
+        *reg_value = REG_TERM * sdata[0];
+    }
+}
+
+__global__ void LossFuncRed(Matrix erMatrix, Matrix difference, int iteration, double* regvalue)  {
+
+    int size = difference.width * difference.length;
+    extern __shared__ double sdata[];
+    unsigned int tid = threadIdx.x;
+    unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+    sdata[tid] = 0;
+
+    if (i < size) {
+        sdata[tid] = pow(difference.data[i], 2) / difference.length;
+    }
+    
+    __syncthreads();
+
+    for (unsigned int s = 1; s < blockDim.x; s *= 2) {
+        if (tid % (2 * s) == 0) {
+            sdata[tid] += sdata[tid + s];
+        }
+        __syncthreads();
+    }
+
+    if (tid == 0) {
+        erMatrix.data[iteration] = sdata[0] + *regvalue;
     }
 }
 
@@ -139,6 +165,10 @@ Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
     d_wGrad.width = y.width; d_wGrad.length = X.width; d_wGrad.stride = y.width;
     cudaMalloc(&d_wGrad.data, X.width * sizeof(double));
 
+    double* regvalue;
+    cudaMalloc((void**)&regvalue, sizeof(double));
+    cudaMemset(regvalue, 0, sizeof(double));
+
     // ERROR COUNTING
     Matrix d_error;
     d_error.width = 1; d_error.length = epochs;
@@ -163,12 +193,13 @@ Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
 
         //---------BACKWARD PASS--------------------------
         // Calculate loss
-        LossFuncRed << < blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(double) >> > (d_error, d_difference, epoch);
+        CalcRegTerm << < blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(double) >> > (d_w, regvalue, REG_TERM);
+        LossFuncRed << < blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(double) >> > (d_error, d_difference, epoch, regvalue);
         // Update bias
         bias_update << < blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(double) >> > (d_difference, d_b, THETA);
         // Update weights
         MatMulKernel << < dimGrid, dimBlock >> > (d_XT, d_difference, d_wGrad);
-        weights_update << < blocksPerGrid, threadsPerBlock >> > (d_w, d_wGrad, THETA, y.length);
+        weights_update << < blocksPerGrid, threadsPerBlock >> > (d_w, d_wGrad, THETA, y.length, REG_TERM);
         // check step
         step_control << < 1, 1 >> > (d_error, d_w, d_b, epoch, THETA);
     }
