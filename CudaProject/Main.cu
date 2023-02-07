@@ -5,6 +5,7 @@
 void test(int value) {
 	Matrix X_lin = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/data/real_estate_X.csv", ',');
 	Matrix y_lin = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/data/real_estate_y.csv", ',');
+
 	if (value == 1) {
 		for (int i = 0; i < 5; i += 1) {
 			LinearRegression reg;

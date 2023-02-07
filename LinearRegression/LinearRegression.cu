@@ -57,7 +57,7 @@ __global__ void bias_update(Matrix difference, Matrix bias, double* THETA)
         __syncthreads();
     }
 
-    if (i == 0) {
+    if (tid == 0) {
         int blocksPerGrid_b = (bias.width * bias.length + threadsPerBlock - 1) / threadsPerBlock;
         broadcast << < blocksPerGrid_b, threadsPerBlock >> > (bias, bias.data[0] - sdata[0]);
     }
