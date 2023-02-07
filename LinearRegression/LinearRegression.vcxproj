@@ -78,7 +78,9 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="LinearRegression.cu" />
+    <CudaCompile Include="LinearRegression.cu">
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LinearRegression.cuh" />

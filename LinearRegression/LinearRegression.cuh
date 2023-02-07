@@ -4,10 +4,15 @@
 #include "../MatrixOperations/MatrixOperations.cuh"
 
 
+
 class LinearRegression {
 public:
+	Matrix result;
 	Matrix losses;
-	Matrix d_w;
-	double THETA = 0.01;
+	Matrix grads;
+	Matrix b;
+	Matrix gradW;
+	Matrix predict;
+	double h_THETA = 0.1;
 	Matrix fit(Matrix X, Matrix y, int epoch);
 };

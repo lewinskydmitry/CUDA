@@ -9,7 +9,7 @@
 #include "../Matrix/Matrix.h"
 
 #define BLOCK_SIZE 16
-#define threadsPerBlock 256
+#define threadsPerBlock 128
 
 //-------------------------------------------------------------
 // GPU MATRIX ADDITION
