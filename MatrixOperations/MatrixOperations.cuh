@@ -45,4 +45,4 @@ Matrix MatMul(const Matrix A, const Matrix B);
 __global__ void TransposeKernel(Matrix odata, const Matrix idata);
 Matrix Transpose(Matrix A);
 __global__ void TransposeKernelRep(Matrix Matrixdata);
-void TransposeRep(Matrix A);
+void TransposeRep(Matrix& A);

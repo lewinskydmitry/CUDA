@@ -120,8 +120,8 @@ __global__ void LossFuncRed(Matrix erMatrix, Matrix difference, int iteration, d
 Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
 
     // Calculate transpose X matrix for future calculation
-    Matrix XT = Transpose(X);
-
+    Matrix XT = X;
+    XT.T();
     // INIT MATRIXES AND VARIABLES
     Matrix d_X;
     d_X.width = X.width; d_X.length = X.length; d_X.stride = X.width;
@@ -204,6 +204,7 @@ Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
         step_control << < 1, 1 >> > (d_error, d_w, d_b, epoch, THETA);
     }
     
+
     // ASSIGNING DEVICE VARIABLES AFTER COMPUTING
     difference.width = y.width; difference.length = y.length;
     difference.data = new double[difference.width * difference.length];

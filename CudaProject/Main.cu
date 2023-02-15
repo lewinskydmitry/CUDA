@@ -6,6 +6,7 @@ void test(int value) {
 	Matrix X_lin = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/data/real_estate_X.csv", ',');
 	Matrix y_lin = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/data/real_estate_y.csv", ',');
 
+
 	if (value == 1) {
 		for (int i = 0; i < 5; i += 1) {
 			LinearRegression reg;
@@ -25,17 +26,27 @@ void test(int value) {
 
 		}
 	}
+
+
 	else
 	{
 		LinearRegression reg;
-		Matrix C_lin = reg.fit(X_lin, y_lin, 1000);
+		Matrix C_lin = reg.fit(X_lin, y_lin, 500);
 		reg.losses.print();
 	}
 }
 
 
 int main() {
-	test(0);
+	//test(0);
+	Matrix X_lin = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/data/real_estate_X.csv", ',');
+	X_lin.T();
+	Matrix X_lin2 = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/data/real_estate_X.csv", ',');
+	std::cout << X_lin2.length << X_lin2.width << "\n";
+	TransposeRep(X_lin2);
+	//X_lin2.equal(X_lin);
+	//X_lin2.print();
+	std::cout << X_lin2.length << X_lin2.width;
 
     return 0;
 }
