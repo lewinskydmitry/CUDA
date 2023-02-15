@@ -5,23 +5,26 @@ __global__ void TransposeKernel(Matrix idata, Matrix odata) {
     __shared__ double tile[BLOCK_SIZE][BLOCK_SIZE];
     int x = blockIdx.x * BLOCK_SIZE + threadIdx.x;
     int y = blockIdx.y * BLOCK_SIZE + threadIdx.y;
-
-
     int i;
-    if (x < idata.width && (y + i) < idata.length) {
-        tile[threadIdx.y + i][threadIdx.x] = idata.data[(y + i) * idata.width + x];
+
+    for (int i = 0; i < BLOCK_SIZE; i += blockDim.y) {
+        if (x < idata.width && (y + i) < idata.length) {
+            tile[threadIdx.y + i][threadIdx.x] = idata.data[(y + i) * idata.width + x];
+        }
     }
-
-
+    
     __syncthreads();
 
     x = blockIdx.y * BLOCK_SIZE + threadIdx.x;
     y = blockIdx.x * BLOCK_SIZE + threadIdx.y;
 
-    if (x < idata.length && (y + i) < idata.width) {
-        odata.data[(y + i) * idata.length + x] = tile[threadIdx.x][threadIdx.y + i];
+    for (int i = 0; i < BLOCK_SIZE; i += blockDim.y) {
+        if (x < idata.length && (y + i) < idata.width) {
+            odata.data[(y + i) * idata.length + x] = tile[threadIdx.x][threadIdx.y + i];
 
+        }
     }
+    
 }
 
 
