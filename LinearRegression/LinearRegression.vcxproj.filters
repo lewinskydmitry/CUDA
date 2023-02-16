@@ -1,12 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CudaCompile Include="LinearRegression.cu" />
-    <CudaCompile Include="Loss function.cu">
-      <Filter>Source files</Filter>
-    </CudaCompile>
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Headers">
       <UniqueIdentifier>{6508c220-38b2-460b-beaf-f8c10f7a12d3}</UniqueIdentifier>
     </Filter>
@@ -18,5 +12,10 @@
     <ClInclude Include="LinearRegression.cuh">
       <Filter>Headers</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="LinearRegression.cu">
+      <Filter>Source files</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

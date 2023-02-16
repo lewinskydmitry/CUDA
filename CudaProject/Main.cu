@@ -39,14 +39,8 @@ void test(int value) {
 
 int main() {
 
-	//test(0);
-	Matrix X_lin = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/data/real_estate_X.csv", ',');
-	X_lin.T();
-	Matrix X_lin2 = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/data/real_estate_X.csv", ',');
+	test(1);
 	
-	TransposeRep(X_lin2);
-	X_lin2.equal(X_lin);
-	X_lin2.print();
 
     return 0;
 }
