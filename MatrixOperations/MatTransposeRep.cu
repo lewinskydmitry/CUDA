@@ -1,11 +1,11 @@
 #include "MatrixOperations.cuh"
 
 
-// Kernel for performing matrix transpose
-__global__ void TransposeKernel(Matrix idata, Matrix odata) {
+// Kernel for performing matrix transpose with replacement
+__global__ void TransposeKernelRep(Matrix idata) {
     __shared__ double tile[BLOCK_SIZE][BLOCK_SIZE];
     int x = blockIdx.x * BLOCK_SIZE + threadIdx.x;
-    int y = blockIdx.y * BLOCK_SIZE + threadIdx.y;
+    int y = blockIdx.y * BLOCK_SIZE + threadIdx.y; 
     int i;
 
     for (int i = 0; i < BLOCK_SIZE; i += blockDim.y) {
@@ -13,7 +13,7 @@ __global__ void TransposeKernel(Matrix idata, Matrix odata) {
             tile[threadIdx.y + i][threadIdx.x] = idata.data[(y + i) * idata.width + x];
         }
     }
-    
+
     __syncthreads();
 
     x = blockIdx.y * BLOCK_SIZE + threadIdx.x;
@@ -21,16 +21,15 @@ __global__ void TransposeKernel(Matrix idata, Matrix odata) {
 
     for (int i = 0; i < BLOCK_SIZE; i += blockDim.y) {
         if (x < idata.length && (y + i) < idata.width) {
-            odata.data[(y + i) * idata.length + x] = tile[threadIdx.x][threadIdx.y + i];
+            idata.data[(y + i) * idata.length + x] = tile[threadIdx.x][threadIdx.y + i];
 
         }
     }
-    
 }
 
 
-// Host code for performing matrix transpose
-Matrix Transpose(Matrix A)
+// Host code for performing matrix transpose with replacement
+void TransposeRep(Matrix& A)
 {
     Matrix d_A;
     d_A.width = A.width; d_A.length = A.length;
@@ -38,27 +37,15 @@ Matrix Transpose(Matrix A)
     cudaMalloc(&d_A.data, size * sizeof(double));
     cudaMemcpy(d_A.data, A.data, size * sizeof(double), cudaMemcpyHostToDevice);
 
-    Matrix d_C;
-    d_C.length = A.width;
-    d_C.width = A.length;
-    cudaMalloc(&d_C.data, size * sizeof(double));
-
     // Invoke kernel
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-    
     dim3 dimGrid((A.width + dimBlock.x - 1) / dimBlock.x, (A.length + dimBlock.y - 1) / dimBlock.y);
-    TransposeKernel <<< dimGrid, dimBlock >>> (d_A, d_C);
+    TransposeKernelRep <<< dimGrid, dimBlock >>> (d_A);
 
-    Matrix C;
-    C.length = A.width;
-    C.width = A.length;
-    C.data = new double[size];
+    cudaMemcpy(A.data, d_A.data, size * sizeof(double), cudaMemcpyDeviceToHost);
 
-    // Read C from device memory
-    cudaMemcpy(C.data, d_C.data, size * sizeof(double), cudaMemcpyDeviceToHost);
-    // Free device memory
+    A.length = d_A.width;
+    A.width = d_A.length;
+
     cudaFree(d_A.data);
-    cudaFree(d_C.data);
-
-    return C;
 }

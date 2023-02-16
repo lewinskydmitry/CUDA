@@ -1,7 +1,9 @@
 #include "MatrixOperations.cuh"
 
+// THIS FILE CONTAINS NAIVE MATRIX MULTIPLICATION
 
-__global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
+// Kernel for performing matrices multiplication
+__global__ void MatMulNaiveKernel(Matrix A, Matrix B, Matrix C)
 {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
@@ -14,9 +16,10 @@ __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 }
 
 
-Matrix MatMul(Matrix A, Matrix B)
+// Hose code for performing matrices multiplication
+Matrix MatMulNaive(Matrix A, Matrix B)
 {
-
+    // This code for catching errors if dimensions of matrixes don't match
     if (A.width != B.length) {
         try {
             throw std::invalid_argument("Dimensions do not match");
@@ -40,7 +43,6 @@ Matrix MatMul(Matrix A, Matrix B)
     cudaMalloc(&d_B.data, size * sizeof(double));
     cudaMemcpy(d_B.data, B.data, size * sizeof(double), cudaMemcpyHostToDevice);
 
-
     Matrix d_C;
     d_C.length = A.length;
     d_C.width = B.width;
@@ -49,7 +51,7 @@ Matrix MatMul(Matrix A, Matrix B)
 
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
     dim3 dimGrid((B.width + dimBlock.x - 1) / dimBlock.x, (A.length + dimBlock.y - 1) / dimBlock.y);
-    MatMulKernel << <dimGrid, dimBlock >> > (d_A, d_B, d_C);
+    MatMulNaiveKernel << <dimGrid, dimBlock >> > (d_A, d_B, d_C);
 
     Matrix C;
     C.length = A.length;
@@ -57,10 +59,12 @@ Matrix MatMul(Matrix A, Matrix B)
     size = A.length * B.width;
     C.data = new double[size];
 
+
     cudaMemcpy(C.data, d_C.data, size * sizeof(double), cudaMemcpyDeviceToHost);
 
     cudaFree(d_A.data);
     cudaFree(d_B.data);
     cudaFree(d_C.data);
+
     return C;
 }

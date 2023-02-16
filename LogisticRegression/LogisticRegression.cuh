@@ -3,7 +3,9 @@
 #include "../Matrix/Matrix.h"
 #include "../MatrixOperations/MatrixOperations.cuh"
 
-class LinearRegression {
+
+
+class LogisticRegression {
 public:
 	// Matrix of the difference between prediction and true values
 	Matrix difference;

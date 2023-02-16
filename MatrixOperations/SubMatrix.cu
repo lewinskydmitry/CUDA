@@ -1,20 +1,21 @@
 #include "MatrixOperations.cuh"
 
 
-__global__
-void cudaAddMatrixKernel(const Matrix A, const Matrix B, Matrix C) 
+// Kernel for performing matrices substraction
+__global__ void SubMatrixKernel(const Matrix A, const Matrix B, Matrix C)
 {
     int size = A.width * A.length;
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
-    while (thread_idx < size) {
-        C.data[thread_idx] = A.data[thread_idx] + B.data[thread_idx];
-        thread_idx += blockDim.x * gridDim.x;
+    if (thread_idx < size) {
+        C.data[thread_idx] = A.data[thread_idx] - B.data[thread_idx];
     }
 }
 
 
-Matrix AddMatrix(Matrix A, Matrix B) {
+// Host code for performing matrices substraction
+Matrix SubMatrix(Matrix A, Matrix B) {
 
+    // This code for catching errors if dimensions of matrices don't match
     if (A.length != B.length && A.width != B.width) {
         try {
             throw std::invalid_argument("Dimensions do not match");
@@ -43,10 +44,8 @@ Matrix AddMatrix(Matrix A, Matrix B) {
     cudaMalloc(&d_C.data, size * sizeof(double));
 
 
-    dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-    dim3 dimGrid((A.width + dimBlock.x - 1) / dimBlock.x, (A.length + dimBlock.y - 1) / dimBlock.y);
-    
-    cudaAddMatrixKernel << < dimGrid, dimBlock >> > (d_A, d_B, d_C);
+    int blocksPerGrid = (d_A.width * d_A.length + threadsPerBlock - 1) / threadsPerBlock;
+    SubMatrixKernel << < blocksPerGrid, threadsPerBlock >> > (d_A, d_B, d_C);
 
     Matrix C;
     C.width = B.width; C.length = B.length;

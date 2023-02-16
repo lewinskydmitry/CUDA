@@ -13,6 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4C5DCE62-1565-434B-900C-6947F29954CB}</ProjectGuid>
     <RootNamespace>CudaProject</RootNamespace>
+    <ProjectName>CudaProject</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -51,10 +52,11 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;cudadevrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -77,11 +79,14 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="Main.cu" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LinearRegression\LinearRegression.vcxproj">
       <Project>{abe7590b-0be2-4fb3-ab25-2c17c465f818}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\LogisticRegression\LogisticRegression.vcxproj">
+      <Project>{c8cb0725-0aa2-4c24-bb50-90591de18ddb}</Project>
     </ProjectReference>
     <ProjectReference Include="..\MatrixOperations\MatrixOperations.vcxproj">
       <Project>{d1228e13-3b9b-49b2-9a8a-010ddf7f6d3a}</Project>
@@ -91,8 +96,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="X.csv" />
-    <None Include="y.csv" />
+    <None Include="data\heart_X.csv">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="data\heart_y.csv">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="data\real_estate_X.csv" />
+    <None Include="data\real_estate_y.csv" />
+    <None Include="data\X_simple_lin.csv" />
+    <None Include="data\y_simple_lin.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

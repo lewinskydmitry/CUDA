@@ -10,9 +10,15 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="LogisticRegression.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LogisticRegression.cuh" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{ABE7590B-0BE2-4FB3-AB25-2C17C465F818}</ProjectGuid>
-    <RootNamespace>LinearRegression</RootNamespace>
+    <ProjectGuid>{C8CB0725-0AA2-4C24-BB50-90591DE18DDB}</ProjectGuid>
+    <RootNamespace>LogisticRegression</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -56,6 +62,7 @@
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -77,22 +84,6 @@
       <TargetMachinePlatform>64</TargetMachinePlatform>
     </CudaCompile>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <CudaCompile Include="LinearRegression.cu">
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
-    </CudaCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="LinearRegression.cuh" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MatrixOperations\MatrixOperations.vcxproj">
-      <Project>{d1228e13-3b9b-49b2-9a8a-010ddf7f6d3a}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Matrix\Matrix.vcxproj">
-      <Project>{b38400dc-4095-4585-a375-2fcf67b8ae19}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 12.0.targets" />

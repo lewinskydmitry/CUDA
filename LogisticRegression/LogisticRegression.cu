@@ -1,4 +1,4 @@
-﻿#include "LinearRegression.cuh"
+﻿#include "LogisticRegression.cuh"
 
 // Kernel for broadcasing some value to whole array
 __global__ void broadcast(Matrix matrix, double value)
@@ -11,13 +11,40 @@ __global__ void broadcast(Matrix matrix, double value)
     }
 }
 
+// Kernel for sigmoid function
+__global__ void LogisticFunction(Matrix predict)
+{
+    int size = predict.width * predict.length;
+    int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (thread_idx < size) {
+        predict.data[thread_idx] = 1/(1-std::exp(predict.data[thread_idx]));
+    }
+}
+
+// Threshold function for prediction
+__global__ void TresholdFunc(Matrix predict)
+{
+    int size = predict.width * predict.length;
+    int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (thread_idx < size) {
+        if (predict.data[thread_idx] >= 0.5) {
+            predict.data[thread_idx] = 1;
+        }
+        else {
+            predict.data[thread_idx] = 0;
+        }
+    }
+}
+
 // Kernel for decreasing learning rate if it's too big for this data. It allows avoid increasing losses
 __global__ void step_control(Matrix d_error, Matrix weights, Matrix b,  int epoch, double* THETA)
 {
     int blocksPerGrid_w = (weights.width * weights.length + threadsPerBlock - 1) / threadsPerBlock;
     int blocksPerGrid_b = (b.width * b.length + threadsPerBlock - 1) / threadsPerBlock;
 
-    if (d_error.data[epoch - 1] * 1.2 < d_error.data[epoch] && epoch != 0) {
+    if (d_error.data[epoch - 1] > 1.2 * d_error.data[epoch] && epoch != 0) {
         *THETA = *THETA / 10;
         broadcast << < blocksPerGrid_w, threadsPerBlock >> > (weights, 0);
         broadcast << < blocksPerGrid_b, threadsPerBlock >> > (b, 0);
@@ -31,7 +58,7 @@ __global__ void weights_update(Matrix weights, Matrix weightsGrad, double* THETA
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_idx < size) {
-        weights.data[thread_idx] += 2 * *THETA * (weightsGrad.data[thread_idx] / length_data + REG_TERM * weights.data[thread_idx]);
+        weights.data[thread_idx] += *THETA * (weightsGrad.data[thread_idx] / length_data + REG_TERM * weights.data[thread_idx]);
     }
 }
 
@@ -46,7 +73,7 @@ __global__ void bias_update(Matrix difference, Matrix bias, double* THETA)
     sdata[tid] = 0;
 
     if (i < size) {
-        sdata[tid] = 2 * *THETA * difference.data[i] / difference.length;
+        sdata[tid] = *THETA * difference.data[i] / difference.length;
     }
     __syncthreads();
 
@@ -91,16 +118,16 @@ __global__ void CalcRegTerm(Matrix weights, double* reg_value, double REG_TERM){
 }
 
 // Kernel for calculation loss for each epoch
-__global__ void LossFuncRed(Matrix erMatrix, Matrix difference, int iteration, double* regvalue)  {
+__global__ void LossFuncRed(Matrix erMatrix, Matrix y_true, Matrix pred, int iteration, double* regvalue)  {
 
-    int size = difference.width * difference.length;
+    int size = y_true.width * y_true.length;
     extern __shared__ double sdata[];
     unsigned int tid = threadIdx.x;
     unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
     sdata[tid] = 0;
 
     if (i < size) {
-        sdata[tid] = pow(difference.data[i], 2) / difference.length;
+        sdata[tid] = -1 * (y_true.data[i] * std::log(pred.data[i]) + (1 - y_true.data[i]) * (1 - std::log(pred.data[i]))) / pred.length;
     }
     
     __syncthreads();
@@ -119,7 +146,7 @@ __global__ void LossFuncRed(Matrix erMatrix, Matrix difference, int iteration, d
 
 
 // The host function for fitting regression
-Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
+Matrix LogisticRegression::fit(Matrix X, Matrix y, int epochs) {
 
     // Calculate transpose X matrix for future calculation
     Matrix XT = Transpose(X);
@@ -189,13 +216,13 @@ Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
         MatMulKernel << < dimGrid, dimBlock >> > (d_X, d_w, d_pred);
         // Add bias
         AddMatrixRepKernel << < blocksPerGrid, threadsPerBlock >> > (d_pred, d_b);
-        // Calculate loss
+        LogisticFunction << < blocksPerGrid, threadsPerBlock >> > (d_pred);
         SubMatrixKernel << < blocksPerGrid, threadsPerBlock >> > (d_y, d_pred, d_difference);
 
         //---------BACKWARD PASS--------------------------
         // Calculate loss
         CalcRegTerm << < blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(double) >> > (d_w, regvalue, REG_TERM);
-        LossFuncRed << < blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(double) >> > (d_error, d_difference, epoch, regvalue);
+        LossFuncRed << < blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(double) >> > (d_error, d_y, d_pred, epoch, regvalue);
         // Update bias
         bias_update << < blocksPerGrid, threadsPerBlock, threadsPerBlock * sizeof(double) >> > (d_difference, d_b, THETA);
         // Update weights
@@ -203,6 +230,9 @@ Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
         weights_update << < blocksPerGrid, threadsPerBlock >> > (d_w, d_wGrad, THETA, y.length, REG_TERM);
         // check step
         step_control << < 1, 1 >> > (d_error, d_w, d_b, epoch, THETA);
+
+        //----------------FINAL PREDICT------------------------
+        TresholdFunc << < blocksPerGrid, threadsPerBlock >> > (d_pred);
     }
     
 

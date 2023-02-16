@@ -1,21 +1,19 @@
 ﻿#include "MatrixOperations.cuh"
 
+// THIS FILE CONTAINS MATRIX MULTIPLICATION WITH SHARED MEMORY
 
+
+// Kernels for performing matrices multiplication
 __device__ float GetElement(const Matrix A, int row, int col)
 {
     return A.data[row * A.stride + col];
 }
-
 
 __device__ void SetElement(Matrix A, int row, int col, double value)
 {
     A.data[row * A.stride + col] = value;
 }
 
-
-// Get the BLOCK_SIZExBLOCK_SIZE sub-matrix Asub of A that is
-// located col sub-matrices to the right and row sub-matrices down
-// from the upper-left corner of A
 __device__ Matrix GetMatrix(Matrix A, int row, int col)
 {
     Matrix Asub;
@@ -26,8 +24,7 @@ __device__ Matrix GetMatrix(Matrix A, int row, int col)
     return Asub;
 }
 
-
-__global__ void MatMulKernelSH(Matrix A, Matrix B, Matrix C)
+__global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 {
     int blockRow = blockIdx.y;
     int blockCol = blockIdx.x;
@@ -77,9 +74,10 @@ __global__ void MatMulKernelSH(Matrix A, Matrix B, Matrix C)
 }
 
 
-Matrix MatMulSH(const Matrix A, const Matrix B)
+// Host code for performing matrices multiplication
+Matrix MatMul(const Matrix A, const Matrix B)
 {
-
+    // This code for catching errors if dimensions of matrices don't match
     if (A.width != B.length) {
         try {
             throw std::invalid_argument("Dimensions do not match");
@@ -91,8 +89,6 @@ Matrix MatMulSH(const Matrix A, const Matrix B)
         }
     }
 
-
-    // Load A and B to device memory
     Matrix d_A;
     d_A.width = A.width; d_A.length = A.length, d_A.stride = A.width;
     size_t size = A.width * A.length;
@@ -112,11 +108,10 @@ Matrix MatMulSH(const Matrix A, const Matrix B)
 
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
     dim3 dimGrid((B.width + dimBlock.x - 1) / dimBlock.x, (A.length + dimBlock.y - 1) / dimBlock.y);
-    MatMulKernelSH <<< dimGrid, dimBlock >>> (d_A, d_B, d_C);
+    MatMulKernel <<< dimGrid, dimBlock >>> (d_A, d_B, d_C);
 
     Matrix C;
-    C.length = A.length;
-    C.width = B.width;
+    C.length = A.length; C.width = B.width;
     size = A.length * B.width;
     C.data = new double[size];
 

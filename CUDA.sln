@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MatrixOperations", "MatrixO
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LinearRegression", "LinearRegression\LinearRegression.vcxproj", "{ABE7590B-0BE2-4FB3-AB25-2C17C465F818}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LogisticRegression", "LogisticRegression\LogisticRegression.vcxproj", "{C8CB0725-0AA2-4C24-BB50-90591DE18DDB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,6 +53,14 @@ Global
 		{ABE7590B-0BE2-4FB3-AB25-2C17C465F818}.Release|x64.Build.0 = Release|x64
 		{ABE7590B-0BE2-4FB3-AB25-2C17C465F818}.Release|x86.ActiveCfg = Release|x64
 		{ABE7590B-0BE2-4FB3-AB25-2C17C465F818}.Release|x86.Build.0 = Release|x64
+		{C8CB0725-0AA2-4C24-BB50-90591DE18DDB}.Debug|x64.ActiveCfg = Debug|x64
+		{C8CB0725-0AA2-4C24-BB50-90591DE18DDB}.Debug|x64.Build.0 = Debug|x64
+		{C8CB0725-0AA2-4C24-BB50-90591DE18DDB}.Debug|x86.ActiveCfg = Debug|x64
+		{C8CB0725-0AA2-4C24-BB50-90591DE18DDB}.Debug|x86.Build.0 = Debug|x64
+		{C8CB0725-0AA2-4C24-BB50-90591DE18DDB}.Release|x64.ActiveCfg = Release|x64
+		{C8CB0725-0AA2-4C24-BB50-90591DE18DDB}.Release|x64.Build.0 = Release|x64
+		{C8CB0725-0AA2-4C24-BB50-90591DE18DDB}.Release|x86.ActiveCfg = Release|x64
+		{C8CB0725-0AA2-4C24-BB50-90591DE18DDB}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
