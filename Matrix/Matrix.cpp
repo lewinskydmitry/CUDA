@@ -1,5 +1,6 @@
 #include "Matrix.h"
 
+// Function for reading csv files as matrix with length and width
 Matrix Matrix::read_csv(std::string path, char delimiter =';') {
     Matrix result;
     std::vector< std::vector<double> > vector2d;
@@ -20,7 +21,7 @@ Matrix Matrix::read_csv(std::string path, char delimiter =';') {
     return result;
 }
 
-
+// We need this function for transfer data from vector to array
 void Matrix::create_data(std::vector< std::vector<double> > vector2d, Matrix matrix) {
     for (int i = 0; i < matrix.length; i++) {
         for (int j = 0; j < matrix.width; j++) {
@@ -29,7 +30,7 @@ void Matrix::create_data(std::vector< std::vector<double> > vector2d, Matrix mat
     }
 }
 
-
+// Function for printing matrix
 void Matrix::print() {
     for (int i = 0; i < length * width; i++) {
         if ((i + 1) % width == 0 && i != 0 || width == 1) {
@@ -41,7 +42,7 @@ void Matrix::print() {
     }
 }
 
-
+// It's static function for printing matrix
 void Matrix::print_matrix(Matrix matrix) {
     size_t length = matrix.length;
     size_t width = matrix.width;
@@ -56,7 +57,7 @@ void Matrix::print_matrix(Matrix matrix) {
     }
 }
 
-
+// static functon for creating random matrix
 Matrix Matrix::create_matrix(int length, int width, int min, int max) {
     Matrix rand;
 
@@ -75,6 +76,7 @@ Matrix Matrix::create_matrix(int length, int width, int min, int max) {
     return rand;
 }
 
+// Function for checking the similarity of matrices
 int Matrix::equal(Matrix comp_matrix) {
     if (comp_matrix.length != length || comp_matrix.width != width) {
         std::cout << "Matrixes are not equal SHAPES" << std::endl;
@@ -92,7 +94,7 @@ int Matrix::equal(Matrix comp_matrix) {
     return 0;
 }
 
-
+// Static Function for checking the similarity of matrices
 int Matrix::equal(Matrix A, Matrix B) {
     if (A.length != B.length || A.width != B.width) {
         std::cout << "Shapes of the matrixes are not equal" << std::endl;
@@ -110,7 +112,7 @@ int Matrix::equal(Matrix A, Matrix B) {
     return 0;
 }
 
-
+// Function for transpose matrix using CPU
 void Matrix::T() {
     double* result = new double[length*width];
 
@@ -126,7 +128,7 @@ void Matrix::T() {
     data = result;
 }
 
-
+// Static function for transpose matrix
 Matrix Matrix::transpose(Matrix init) {
     Matrix result;
     result.length = init.width;
@@ -143,7 +145,7 @@ Matrix Matrix::transpose(Matrix init) {
     return result;
 }
 
-
+// Static CPU matrix multiplication function
 Matrix Matrix::MatMul(Matrix A, Matrix B) {
     if (A.width != B.length) {
         try {

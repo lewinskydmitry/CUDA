@@ -1,6 +1,6 @@
 ﻿#include "LogisticRegression.cuh"
 
-
+// Kernel for broadcasing some value to whole array
 __global__ void broadcast(Matrix matrix, double value)
 {
     int size = matrix.width * matrix.length;
@@ -11,7 +11,7 @@ __global__ void broadcast(Matrix matrix, double value)
     }
 }
 
-
+// Kernel for sigmoid function
 __global__ void LogisticFunction(Matrix predict)
 {
     int size = predict.width * predict.length;
@@ -22,7 +22,7 @@ __global__ void LogisticFunction(Matrix predict)
     }
 }
 
-
+// Threshold function for prediction
 __global__ void TresholdFunc(Matrix predict)
 {
     int size = predict.width * predict.length;
@@ -38,7 +38,7 @@ __global__ void TresholdFunc(Matrix predict)
     }
 }
 
-
+// Kernel for decreasing learning rate if it's too big for this data. It allows avoid increasing losses
 __global__ void step_control(Matrix d_error, Matrix weights, Matrix b,  int epoch, double* THETA)
 {
     int blocksPerGrid_w = (weights.width * weights.length + threadsPerBlock - 1) / threadsPerBlock;
@@ -51,18 +51,18 @@ __global__ void step_control(Matrix d_error, Matrix weights, Matrix b,  int epoc
     }
 }
 
-
+// Kernel for updating weights using gradients
 __global__ void weights_update(Matrix weights, Matrix weightsGrad, double* THETA, int length_data, double REG_TERM)
 {
     int size = weightsGrad.width * weightsGrad.length;
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_idx < size) {
-        weights.data[thread_idx] += 2 * *THETA * (weightsGrad.data[thread_idx] / length_data + REG_TERM * weights.data[thread_idx]);
+        weights.data[thread_idx] += *THETA * (weightsGrad.data[thread_idx] / length_data + REG_TERM * weights.data[thread_idx]);
     }
 }
 
-
+// Kernel for updating bias
 __global__ void bias_update(Matrix difference, Matrix bias, double* THETA)
 {
     int size = difference.width * difference.length;
@@ -90,7 +90,7 @@ __global__ void bias_update(Matrix difference, Matrix bias, double* THETA)
     }
 }
 
-
+// Kernel for calculating regularization term for loss function (ridge)
 __global__ void CalcRegTerm(Matrix weights, double* reg_value, double REG_TERM){
 
     int size = weights.width * weights.length;
@@ -117,7 +117,7 @@ __global__ void CalcRegTerm(Matrix weights, double* reg_value, double REG_TERM){
     }
 }
 
-
+// Kernel for calculation loss for each epoch
 __global__ void LossFuncRed(Matrix erMatrix, Matrix y_true, Matrix pred, int iteration, double* regvalue)  {
 
     int size = y_true.width * y_true.length;
@@ -145,7 +145,7 @@ __global__ void LossFuncRed(Matrix erMatrix, Matrix y_true, Matrix pred, int ite
 }
 
 
-
+// The host function for fitting regression
 Matrix LogisticRegression::fit(Matrix X, Matrix y, int epochs) {
 
     // Calculate transpose X matrix for future calculation
@@ -230,6 +230,9 @@ Matrix LogisticRegression::fit(Matrix X, Matrix y, int epochs) {
         weights_update << < blocksPerGrid, threadsPerBlock >> > (d_w, d_wGrad, THETA, y.length, REG_TERM);
         // check step
         step_control << < 1, 1 >> > (d_error, d_w, d_b, epoch, THETA);
+
+        //----------------FINAL PREDICT------------------------
+        TresholdFunc << < blocksPerGrid, threadsPerBlock >> > (d_pred);
     }
     
 

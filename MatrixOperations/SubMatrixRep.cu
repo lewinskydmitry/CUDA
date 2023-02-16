@@ -1,7 +1,8 @@
 #include "MatrixOperations.cuh"
 
 
-__global__ void SubMatrixRepKernel(Matrix A, Matrix B)
+// Kernel for performing matrices substraction with replacement
+__global__ void SubMatrixRepKernel(Matrix& A, Matrix B)
 {
     int size = A.width * A.length;
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -11,8 +12,10 @@ __global__ void SubMatrixRepKernel(Matrix A, Matrix B)
 }
 
 
-void SubMatrixRep(Matrix A, Matrix B) {
+// Host code for performing matrices substraction with replacement
+void SubMatrixRep(Matrix& A, Matrix B) {
 
+    // This code for catching errors if dimensions of matrices don't match
     if (A.length != B.length && A.width != B.width) {
         try {
             throw std::invalid_argument("Dimensions do not match");

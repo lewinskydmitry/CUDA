@@ -1,6 +1,8 @@
 #include "MatrixOperations.cuh"
 
+// THIS FILE CONTAINS NAIVE MATRIX MULTIPLICATION
 
+// Kernel for performing matrices multiplication
 __global__ void MatMulNaiveKernel(Matrix A, Matrix B, Matrix C)
 {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
@@ -14,9 +16,10 @@ __global__ void MatMulNaiveKernel(Matrix A, Matrix B, Matrix C)
 }
 
 
+// Hose code for performing matrices multiplication
 Matrix MatMulNaive(Matrix A, Matrix B)
 {
-
+    // This code for catching errors if dimensions of matrixes don't match
     if (A.width != B.length) {
         try {
             throw std::invalid_argument("Dimensions do not match");

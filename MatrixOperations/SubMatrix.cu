@@ -1,6 +1,7 @@
 #include "MatrixOperations.cuh"
 
 
+// Kernel for performing matrices substraction
 __global__ void SubMatrixKernel(const Matrix A, const Matrix B, Matrix C)
 {
     int size = A.width * A.length;
@@ -11,8 +12,10 @@ __global__ void SubMatrixKernel(const Matrix A, const Matrix B, Matrix C)
 }
 
 
+// Host code for performing matrices substraction
 Matrix SubMatrix(Matrix A, Matrix B) {
 
+    // This code for catching errors if dimensions of matrices don't match
     if (A.length != B.length && A.width != B.width) {
         try {
             throw std::invalid_argument("Dimensions do not match");

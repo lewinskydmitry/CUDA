@@ -2,11 +2,16 @@
 #include "../MatrixOperations/MatrixOperations.cuh"
 #include "../LinearRegression/LinearRegression.cuh"
 
+
+// Function for testing Linear regression
+// if value = 1 we can check all logs (weights, bias and other computations on each step)
+// if value = 0 (or any other value) we will check losses on each step
 void test(int value) {
+	// Read CSV data
 	Matrix X_lin = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/data/real_estate_X.csv", ',');
 	Matrix y_lin = Matrix::read_csv("C:/Users/Dmitry/source/repos/lewinskydmitry/CUDA/CudaProject/data/real_estate_y.csv", ',');
 
-
+	// Here we check logs or losses. This if depends on our "value"
 	if (value == 1) {
 		for (int i = 0; i < 5; i += 1) {
 			LinearRegression reg;
@@ -26,8 +31,6 @@ void test(int value) {
 
 		}
 	}
-
-
 	else
 	{
 		LinearRegression reg;
@@ -36,11 +39,9 @@ void test(int value) {
 	}
 }
 
-
+// The main function for testing everything
 int main() {
-
+	// Example of using testing function for checking logs
 	test(1);
-	
-
     return 0;
 }

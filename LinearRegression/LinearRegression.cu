@@ -1,6 +1,6 @@
 ﻿#include "LinearRegression.cuh"
 
-
+// Kernel for broadcasing some value to whole array
 __global__ void broadcast(Matrix matrix, double value)
 {
     int size = matrix.width * matrix.length;
@@ -11,7 +11,7 @@ __global__ void broadcast(Matrix matrix, double value)
     }
 }
 
-
+// Kernel for decreasing learning rate if it's too big for this data. It allows avoid increasing losses
 __global__ void step_control(Matrix d_error, Matrix weights, Matrix b,  int epoch, double* THETA)
 {
     int blocksPerGrid_w = (weights.width * weights.length + threadsPerBlock - 1) / threadsPerBlock;
@@ -24,7 +24,7 @@ __global__ void step_control(Matrix d_error, Matrix weights, Matrix b,  int epoc
     }
 }
 
-
+// Kernel for updating weights using gradients
 __global__ void weights_update(Matrix weights, Matrix weightsGrad, double* THETA, int length_data, double REG_TERM)
 {
     int size = weightsGrad.width * weightsGrad.length;
@@ -35,7 +35,7 @@ __global__ void weights_update(Matrix weights, Matrix weightsGrad, double* THETA
     }
 }
 
-
+// Kernel for updating bias
 __global__ void bias_update(Matrix difference, Matrix bias, double* THETA)
 {
     int size = difference.width * difference.length;
@@ -63,7 +63,7 @@ __global__ void bias_update(Matrix difference, Matrix bias, double* THETA)
     }
 }
 
-
+// Kernel for calculating regularization term for loss function (ridge)
 __global__ void CalcRegTerm(Matrix weights, double* reg_value, double REG_TERM){
 
     int size = weights.width * weights.length;
@@ -90,7 +90,7 @@ __global__ void CalcRegTerm(Matrix weights, double* reg_value, double REG_TERM){
     }
 }
 
-
+// Kernel for calculation loss for each epoch
 __global__ void LossFuncRed(Matrix erMatrix, Matrix difference, int iteration, double* regvalue)  {
 
     int size = difference.width * difference.length;
@@ -118,7 +118,7 @@ __global__ void LossFuncRed(Matrix erMatrix, Matrix difference, int iteration, d
 }
 
 
-
+// The host function for fitting regression
 Matrix LinearRegression::fit(Matrix X, Matrix y, int epochs) {
 
     // Calculate transpose X matrix for future calculation

@@ -1,5 +1,9 @@
 ﻿#include "MatrixOperations.cuh"
 
+// THIS FILE CONTAINS MATRIX MULTIPLICATION WITH SHARED MEMORY
+
+
+// Kernels for performing matrices multiplication
 __device__ float GetElement(const Matrix A, int row, int col)
 {
     return A.data[row * A.stride + col];
@@ -19,8 +23,6 @@ __device__ Matrix GetMatrix(Matrix A, int row, int col)
     Asub.data = &A.data[A.stride * BLOCK_SIZE * row + BLOCK_SIZE * col];
     return Asub;
 }
-
-
 
 __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 {
@@ -72,10 +74,10 @@ __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C)
 }
 
 
-
+// Host code for performing matrices multiplication
 Matrix MatMul(const Matrix A, const Matrix B)
 {
-
+    // This code for catching errors if dimensions of matrices don't match
     if (A.width != B.length) {
         try {
             throw std::invalid_argument("Dimensions do not match");

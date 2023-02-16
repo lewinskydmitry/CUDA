@@ -1,6 +1,7 @@
 #include "MatrixOperations.cuh"
 
 
+// Kernel for performing matrix transpose
 __global__ void TransposeKernel(Matrix idata, Matrix odata) {
     __shared__ double tile[BLOCK_SIZE][BLOCK_SIZE];
     int x = blockIdx.x * BLOCK_SIZE + threadIdx.x;
@@ -28,6 +29,7 @@ __global__ void TransposeKernel(Matrix idata, Matrix odata) {
 }
 
 
+// Host code for performing matrix transpose
 Matrix Transpose(Matrix A)
 {
     Matrix d_A;

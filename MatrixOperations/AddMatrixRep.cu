@@ -1,6 +1,7 @@
 #include "MatrixOperations.cuh"
 
 
+// Kernel for performing matrices addition with replacement
 __global__ void AddMatrixRepKernel(Matrix A, Matrix B)
 {
     int size = A.width * A.length;
@@ -11,8 +12,10 @@ __global__ void AddMatrixRepKernel(Matrix A, Matrix B)
 }
 
 
-void AddMatrixRep(Matrix A, Matrix B) {
+// Host code for performing matrices addition with replacement
+void AddMatrixRep(Matrix& A, Matrix B) {
 
+    // This code for catching errors if dimensions of matrices don't match
     if (A.length != B.length && A.width != B.width) {
         try {
             throw std::invalid_argument("Dimensions do not match");
@@ -39,6 +42,7 @@ void AddMatrixRep(Matrix A, Matrix B) {
     AddMatrixRepKernel << < blocksPerGrid, threadsPerBlock >> > (d_A, d_B);
 
     cudaMemcpy(A.data, d_A.data, size * sizeof(double), cudaMemcpyDeviceToHost);
+
     cudaFree(d_A.data);
     cudaFree(d_B.data);
 };

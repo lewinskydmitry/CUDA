@@ -1,6 +1,7 @@
 #include "MatrixOperations.cuh"
 
 
+// Kernel code for performing matrices addition
 __global__ void AddMatrixKernel(const Matrix A, const Matrix B, Matrix C)
 {
     int size = A.width * A.length;
@@ -11,8 +12,10 @@ __global__ void AddMatrixKernel(const Matrix A, const Matrix B, Matrix C)
 }
 
 
+// Host code for performing matrices addition
 Matrix AddMatrix(Matrix A, Matrix B) {
 
+    // This code for catching errors if dimensions of matrices don't match
     if (A.length != B.length && A.width != B.width) {
         try {
             throw std::invalid_argument("Dimensions do not match");
