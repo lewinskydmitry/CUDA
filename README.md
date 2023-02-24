@@ -1,4 +1,5 @@
-# Summary: This project was developed for the "GPU computing class" at UGA and focuses on improving computations for linear and logistic regression as well as matrix operations. It includes a matrix class used for all computations, GPU matrix operations, and implementations of linear and logistic regression using C++ and CUDA.
+# Summary: 
+This project was developed for the "GPU computing class" at UGA and focuses on improving computations for linear and logistic regression as well as matrix operations. It includes a matrix class used for all computations, GPU matrix operations, and implementations of linear and logistic regression using C++ and CUDA.
 
 # Description:
 
